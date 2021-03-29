@@ -10,6 +10,7 @@ class VanillaResNet(nn.Module):
         if freeze:
             self._freeze()
         self.resnet.fc = nn.Linear(in_features=2048, out_features=18, bias=True)
+        self._initialize()
 
     def forward(self, x):
         output = self.resnet(x)
@@ -20,8 +21,9 @@ class VanillaResNet(nn.Module):
             if name not in ["fc.weight", "fc.bias"]:
                 param.requires_grad = False
 
-    def _init(self):
-        torch.nn.init.xavier_uniform(self.resnet.fc.weight)
+    def _initialize(self):
+        torch.nn.init.xavier_uniform_(self.resnet.fc.weight)
+        self.resnet.fc.bias.data.fill_(0.01)
 
 
 class ThreeHeadsNet(nn.Module):
@@ -29,6 +31,7 @@ class ThreeHeadsNet(nn.Module):
         super(ThreeHeadsNet, self).__init__()
         self.resnet = models.resnet50(pretrained=True)
         self._freeze()
+        raise NotImplementedError()
 
     def forward(self, x):
         output = self.resnet(x)

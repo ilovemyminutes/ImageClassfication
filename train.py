@@ -11,7 +11,7 @@ from utils import set_seed
 
 
 def train(
-    model: str = Config.VanillaResNet,
+    model_type: str = Config.VanillaResNet,
     data_root: str = Config.Train,
     transform_type: str = Config.BaseTransform,
     epochs: int = Config.Epochs,
@@ -23,7 +23,7 @@ def train(
 ):
     print("============Settings============")
     print(
-        f"Model: {model}, Loaded: {load_state_dict}, Transform Type: {transform_type}, Epochs: {epochs}, Batch Size: {batch_size}, LR: {lr}, Seed: {seed}"
+        f"Model: {model_type}, Load: {load_state_dict}, Transform Type: {transform_type}, Epochs: {epochs}, Batch Size: {batch_size}, LR: {lr}, Seed: {seed}"
     )
     print("================================")
 
@@ -31,12 +31,16 @@ def train(
     trainloader = get_dataloader("train", data_root, transform_type, batch_size)
     validloader = get_dataloader("valid", data_root, transform_type, batch_size)
 
-    model = VanillaResNet()
+    if model_type == 'vanillaresnet':
+        model = VanillaResNet()
+    else:
+        raise NotImplementedError()
+
     if load_state_dict:
         model.load_state_dict(torch.load(load_state_dict))
+
     model.cuda()
     model.train()
-
     optimizer = optim.Adam(params=model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss()
 
@@ -52,7 +56,7 @@ def train(
             loss.backward()
             optimizer.step()
 
-            if idx != 0 and idx % 50 == 0:
+            if idx != 0 and idx % 100 == 0:
                 model.eval()
                 total_loss = 0
                 total_corrects = 0
@@ -70,12 +74,12 @@ def train(
 
                 avg_loss = total_loss / num_samples
                 avg_acc = total_corrects / num_samples
-                print(f"[Valid] Avg Loss: {avg_loss} Avg Acc: {avg_acc}")
+                print(f"[Valid] Avg Loss: {avg_loss:.4f} Avg Acc: {avg_acc:.4f}")
                 model.train()
 
         if save_path:
-            model_name = f"{model}_epoch{epoch:0>2d}_transform{transform_type}_loss{avg_loss:.4f}_acc{avg_acc:.4f}_seed777.pth"
-            torch.save(model.state_dict(), os.path.join(save_path, model_name))
+            name = f"{model_type}_epoch{epoch:0>2d}_transform{transform_type}_loss{avg_loss:.4f}_acc{avg_acc:.4f}_seed{seed}.pth"
+            torch.save(model.state_dict(), os.path.join(save_path, name))
 
 
 if __name__ == "__main__":
