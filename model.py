@@ -4,10 +4,11 @@ from torchvision import models
 
 
 class VanillaResNet(nn.Module):
-    def __init__(self):
+    def __init__(self, freeze: bool=True):
         super(VanillaResNet, self).__init__()
         self.resnet = models.resnet101(pretrained=True)
-        self._freeze()
+        if freeze:
+            self._freeze()
         self.resnet.fc = nn.Linear(in_features=2048, out_features=18, bias=True)
 
     def forward(self, x):
@@ -21,9 +22,6 @@ class VanillaResNet(nn.Module):
 
     def _init(self):
         torch.nn.init.xavier_uniform(self.resnet.fc.weight)
-
-        
-
 
 
 class ThreeHeadsNet(nn.Module):

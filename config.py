@@ -9,5 +9,6 @@ class Config:
     Epochs: int=10
     BaseTransform: str='base'
     VanillaResNet: str='vanillaresnet'
+    ModelPath: str='./saved_models'
     
 
