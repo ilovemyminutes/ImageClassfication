@@ -5,6 +5,10 @@ input/data/train/images/*/*.jpg
 input/data/train/images/*.csv
 input/data/train/*
 input/data/*
+preprocessed/*/*
+
+# Model Params
+saved_models/*.pth
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
