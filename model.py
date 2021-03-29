@@ -2,9 +2,9 @@ from torch import nn
 from torchvision import models
 
 
-class ResNet50(nn.Module):
+class ThreeHeadsNet(nn.Module):
     def __init__(self):
-        super(ResNet50, self).__init__()
+        super(ThreeHeadsNet, self).__init__()
         self.resnet = models.resnet50(pretrained=True)
         self._freeze()
 
