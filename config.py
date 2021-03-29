@@ -4,7 +4,9 @@ from dataclasses import dataclass
 @dataclass
 class Config:
     Train: str = "./preprocessed/train"
-    Eval: str = "./input/eval"
+    Eval: str = "./input/data/eval/images"
+    Inference: str='./prediction'
+    Info: str='./input/data/eval/info.csv'
     BatchSize: int = 128
     LR: float = 5e-4
     Epochs: int = 10

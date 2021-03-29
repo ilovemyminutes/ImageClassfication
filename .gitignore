@@ -6,6 +6,7 @@ input/data/train/images/*.csv
 input/data/train/*
 input/data/*
 preprocessed/*/*
+prediction/*/*
 
 # Model Params
 saved_models/*.pth
