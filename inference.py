@@ -9,17 +9,16 @@ from model import load_model
 from config import Config
 
 
-LOAD_STATE_DICT = "./saved_models/vanillaresnet_epoch04_lr0.0005_transformbase_loss0.0050_acc0.8092_seed42.pth"
+LOAD_STATE_DICT = "./saved_models/VanillaEfficientNet_epoch00_lr0.0005_transformbase_loss0.0043_acc0.8374_seed42.pth"
 
-
-def test_predict(
-    model_type: str = Config.VanillaResNet,
+    
+def predict(
+    model_type: str = Config.VanillaEfficientNet,
     load_state_dict: str = LOAD_STATE_DICT,
     transform_type: str = Config.BaseTransform,
     data_root: str = Config.Test,
     save_path: str = Config.Inference,
 ):
-    
     model = load_model(model_type, load_state_dict)
     model.cuda()
     model.eval()
@@ -55,14 +54,13 @@ def test_predict(
         )
 
 
-def eval_predict(
-    model_type: str = Config.VanillaResNet,
+def submit(
+    model_type: str = Config.VanillaEfficientNet,
     load_state_dict: str = LOAD_STATE_DICT,
     transform_type: str = Config.BaseTransform,
     data_root: str = Config.Eval,
     save_path: str = Config.Inference,
 ):
-    info = pd.read_csv(Config.Info)
     model = load_model(model_type, load_state_dict)
     model.cuda()
     model.eval()
@@ -73,19 +71,20 @@ def eval_predict(
         transform_type=transform_type,
         batch_size=1,
         shuffle=False,
-        drop_last=False,
+        drop_last=False
     )
-    pred_dict = {}
-    for name, img in tqdm(dataloader, desc="Inference"):
-        name, img = name[0], img.cuda()
-        outputs = model(img)
-        _, pred_label = torch.max(outputs, 1)
-        pred_dict[name] = int(pred_label.item())
 
-    prediction_raw = pd.Series(pred_dict).to_frame("ans")
-    prediction_raw = prediction_raw.reset_index().rename({"index": "ImageID"}, axis=1)
-    prediction = info[["ImageID"]].merge(prediction_raw, how="left", on="ImageID")
+    with torch.no_grad():
+        id_list = []
+        pred_list = []
+        for img_id, img in tqdm(dataloader, desc="Inference"):
+            img_id, img = img_id[0], img.cuda()
+            output = model(img)
+            _, pred = torch.max(output, 1)
+            id_list.append(img_id)
+            pred_list.append(pred.item())
 
+    prediction = pd.DataFrame(dict(ImageID=id_list, ans=pred_list))
     if save_path:
         model_name = os.path.basename(load_state_dict)
         if model_name not in os.listdir(save_path):
@@ -96,4 +95,4 @@ def eval_predict(
 
 
 if __name__ == "__main__":
-    fire.Fire({"eval": eval_predict, "test": test_predict})
+    fire.Fire({"eval": submit, "pred": predict})

@@ -1,9 +1,10 @@
 import os
-from glob import glob
 from PIL import Image
 from torch.utils.data import DataLoader, Dataset
 from torchvision.datasets import ImageFolder
 from transform_settings import configure_transform
+from utils import load_pickle
+from config import Config
 
 
 def get_dataloader(
@@ -15,6 +16,7 @@ def get_dataloader(
     drop_last: bool = True,
 ):
     transform = configure_transform(phase, transform_type)
+
     if phase in ["train", "valid", "test"]:
         dataset = ImageFolder(data_root, transform)
         dataloader = DataLoader(
@@ -31,7 +33,8 @@ def get_dataloader(
 
 class EvalDataset(Dataset):
     def __init__(self, data_root, transform=None):
-        self.img_paths = glob(os.path.join(data_root, "*"))
+        info = load_pickle(Config.Info) # 추론 순서를 맞추기 위해
+        self.img_paths = list(map(lambda x: os.path.join(data_root, x), info))
         self.transform = transform
 
     def __getitem__(self, index):

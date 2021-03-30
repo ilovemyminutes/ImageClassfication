@@ -8,13 +8,18 @@ class Config:
     Test: str = "./preprocessed/test"
     Eval: str = "./input/data/eval/images"
 
-    Inference: str = "./prediction"
-    Info: str = "./input/data/eval/info.csv"
-
     BatchSize: int = 128
     LR: float = 5e-4
-    Epochs: int = 5
-    BaseTransform: str = "base"
-    VanillaResNet: str = "VanillaResNet"
-    ModelPath: str = "./saved_models"
+    Epochs: int = 1
     Seed: int = 42
+
+    BaseTransform: str = "base"
+    FixTransform: str = "fix"
+
+    VanillaResNet: str = "VanillaResNet"
+    VanillaEfficientNet: str = "VanillaEfficientNet"
+    ModelPath: str = "./saved_models"
+
+    Inference: str = "./prediction"
+    Info: str = "./preprocessed/info.pkl"
+    
