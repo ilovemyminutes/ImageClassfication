@@ -1,5 +1,4 @@
 from torchvision import transforms
-from torchvision.transforms.transforms import CenterCrop
 
 
 def configure_transform(phase: str, transform_type: int):
@@ -7,7 +6,7 @@ def configure_transform(phase: str, transform_type: int):
         if transform_type == "base":
             transform = transforms.Compose(
                 [
-                    transforms.CenterCrop([384, 384]),
+                    transforms.CenterCrop((384, 384)),
                     transforms.RandomResizedCrop(224),
                     transforms.RandomHorizontalFlip(),
                     transforms.ToTensor(),
@@ -21,7 +20,7 @@ def configure_transform(phase: str, transform_type: int):
         if transform_type == "base":
             transform = transforms.Compose(
                 [
-                    transforms.CenterCrop([384, 384]),
+                    transforms.CenterCrop((384, 384)),
                     transforms.Resize(256),
                     transforms.CenterCrop(224),
                     transforms.ToTensor(),

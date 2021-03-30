@@ -55,7 +55,7 @@ def train(
             loss.backward()
             optimizer.step()
 
-            if idx != 0 and idx % 100 == 0:
+            if idx != 0 and idx % 60 == 0:
                 model.eval()
                 total_loss = 0
                 total_corrects = 0
