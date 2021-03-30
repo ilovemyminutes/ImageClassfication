@@ -8,8 +8,8 @@ class Config:
     Test: str = "./preprocessed/test"
     Eval: str = "./input/data/eval/images"
 
-    Inference: str='./prediction'
-    Info: str='./input/data/eval/info.csv'
+    Inference: str = "./prediction"
+    Info: str = "./input/data/eval/info.csv"
 
     BatchSize: int = 128
     LR: float = 5e-4

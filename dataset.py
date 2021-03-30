@@ -15,21 +15,23 @@ def get_dataloader(
     drop_last: bool = True,
 ):
     transform = configure_transform(phase, transform_type)
-    if phase in ['train', 'valid', 'test']:
+    if phase in ["train", "valid", "test"]:
         dataset = ImageFolder(data_root, transform)
         dataloader = DataLoader(
             dataset, batch_size=batch_size, shuffle=shuffle, drop_last=drop_last
         )
-    else: # eval
+    else:  # eval
         dataset = EvalDataset(data_root, transform)
-        dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, drop_last=drop_last)
+        dataloader = DataLoader(
+            dataset, batch_size=batch_size, shuffle=shuffle, drop_last=drop_last
+        )
 
     return dataloader
 
 
 class EvalDataset(Dataset):
     def __init__(self, data_root, transform=None):
-        self.img_paths = glob(os.path.join(data_root, '*'))
+        self.img_paths = glob(os.path.join(data_root, "*"))
         self.transform = transform
 
     def __getitem__(self, index):

@@ -2,6 +2,16 @@ import torch
 from torch import nn
 from torchvision import models
 
+def load_model(model_type: str, load_state_dict: str):
+    if model_type == "VanillaResNet":
+        model = VanillaResNet()
+    else:
+        raise NotImplementedError()
+    if load_state_dict:
+        model.load_state_dict(torch.load(load_state_dict))
+
+    return model
+    
 
 class VanillaResNet(nn.Module):
     def __init__(self, freeze: bool = True):
