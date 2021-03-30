@@ -8,8 +8,8 @@ class Config:
     Inference: str='./prediction'
     Info: str='./input/data/eval/info.csv'
     BatchSize: int = 128
-    LR: float = 5e-4
-    Epochs: int = 10
+    LR: float = 25e-5
+    Epochs: int = 30
     BaseTransform: str = "base"
     VanillaResNet: str = "vanillaresnet"
     ModelPath: str = "./saved_models"
