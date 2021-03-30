@@ -26,17 +26,17 @@ class VanillaResNet(nn.Module):
         self.resnet.fc.bias.data.fill_(0.01)
 
 
-class ThreeHeadsNet(nn.Module):
-    def __init__(self):
-        super(ThreeHeadsNet, self).__init__()
-        self.resnet = models.resnet50(pretrained=True)
-        self._freeze()
-        raise NotImplementedError()
+# class ThreeHeadsNet(nn.Module):
+#     def __init__(self):
+#         super(ThreeHeadsNet, self).__init__()
+#         self.resnet = models.resnet50(pretrained=True)
+#         self._freeze()
+#         raise NotImplementedError()
 
-    def forward(self, x):
-        output = self.resnet(x)
+#     def forward(self, x):
+#         output = self.resnet(x)
 
-    def _freeze(self):
-        for name, param in self.resnet.named_parameters():
-            if name not in ["fc.weight", "fc.bias"]:
-                param.requires_grad = False
+#     def _freeze(self):
+#         for name, param in self.resnet.named_parameters():
+#             if name not in ["fc.weight", "fc.bias"]:
+#                 param.requires_grad = False

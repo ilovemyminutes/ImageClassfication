@@ -31,7 +31,7 @@ def train(
     trainloader = get_dataloader("train", data_root, transform_type, batch_size)
     validloader = get_dataloader("valid", data_root, transform_type, batch_size)
 
-    if model_type == 'vanillaresnet':
+    if model_type == 'VanillaResNet':
         model = VanillaResNet()
     else:
         raise NotImplementedError()
