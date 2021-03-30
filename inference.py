@@ -9,15 +9,15 @@ from model import VanillaResNet
 from config import Config
 
 
-LOAD_STATE_DICT = './saved_models/vanillaresnet_epoch29_transformbase_loss0.0036_acc0.8503_seed42.pth'
+LOAD_STATE_DICT = './saved_models/vanillaresnet_epoch01_transformbase_loss0.0087_acc0.6820_seed42.pth'
 
 def predict(model_type: str=Config.VanillaResNet, load_state_dict: str=LOAD_STATE_DICT, transform_type: str=Config.BaseTransform, data_root: str=Config.Eval, save_path: str=Config.Inference):
     info = pd.read_csv(Config.Info)
 
-    # if model_type == "vanillaresnet":
-    model = VanillaResNet()
-    # else:
-    #     raise NotImplementedError()
+    if model_type == "vanillaresnet":
+        model = VanillaResNet()
+    else:
+        raise NotImplementedError()
 
     if load_state_dict:
         model.load_state_dict(torch.load(load_state_dict))
@@ -25,10 +25,8 @@ def predict(model_type: str=Config.VanillaResNet, load_state_dict: str=LOAD_STAT
     model.cuda()
     model.eval()
 
-    pred_dict ={}
-    
     testloader = get_dataloader(phase='test', data_root=data_root, transform_type=transform_type, batch_size=1, shuffle=False, drop_last=False)
-
+    pred_dict ={}
     for name, img in tqdm(testloader, desc='Inference'):
         name, img = name[0], img.cuda()
         outputs = model(img)
@@ -47,5 +45,5 @@ def predict(model_type: str=Config.VanillaResNet, load_state_dict: str=LOAD_STAT
 
 
 if __name__ == '__main__':
-    fire.Fire(predict)
+    fire.Fire({'run': predict})
 

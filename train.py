@@ -50,9 +50,8 @@ def train(
             optimizer.zero_grad()
 
             imgs, labels = imgs.cuda(), labels.cuda()
-
-            pred = model(imgs)
-            loss = criterion(pred, labels)
+            output = model(imgs)
+            loss = criterion(output, labels)
             loss.backward()
             optimizer.step()
 
@@ -78,7 +77,7 @@ def train(
                 model.train()
 
         if save_path:
-            name = f"{model_type}_epoch{epoch:0>2d}_transform{transform_type}_loss{avg_loss:.4f}_acc{avg_acc:.4f}_seed{seed}.pth"
+            name = f"{model_type}_epoch{epoch:0>2d}_lr{lr}_transform{transform_type}_loss{avg_loss:.4f}_acc{avg_acc:.4f}_seed{seed}.pth"
             torch.save(model.state_dict(), os.path.join(save_path, name))
 
 
