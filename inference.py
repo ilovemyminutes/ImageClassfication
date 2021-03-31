@@ -9,7 +9,7 @@ from model import load_model
 from config import Config
 
 
-LOAD_STATE_DICT = "./saved_models/VanillaEfficientNet_epoch00_lr0.0005_transformbase_optimadam_loss0.0048_acc0.8244_seed42.pth"
+LOAD_STATE_DICT = "./saved_models/VanillaEfficientNet_epoch08_lr0.0005_transformbase_optimadam_loss0.0008_acc0.9841_seed42.pth"
 
     
 def predict(
