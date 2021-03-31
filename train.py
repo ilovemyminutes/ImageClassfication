@@ -5,25 +5,26 @@ from torch import nn, optim
 from torch.nn import functional as F
 import fire
 from model import load_model
-from config import Config
+from config import Config, Optimizer
 from dataset import get_dataloader
 from utils import set_seed
 
 
 def train(
-    model_type: str = Config.VanillaResNet,
+    model_type: str = Config.VanillaEfficientNet,
     data_root: str = Config.Train,
     transform_type: str = Config.BaseTransform,
     epochs: int = Config.Epochs,
     batch_size: int = Config.BatchSize,
     lr: float = Config.LR,
+    optim_type: str = Config.Adam,
     load_state_dict: str = None,
     save_path: str = Config.ModelPath,
     seed: int = Config.Seed,
 ):
     print("============Settings============")
     print(
-        f"Model: {model_type}, Load: {load_state_dict}, Transform Type: {transform_type}, Epochs: {epochs}, Batch Size: {batch_size}, LR: {lr}, Seed: {seed}"
+        f"Model: {model_type}, Load: {load_state_dict}, Transform Type: {transform_type}, Epochs: {epochs}, Batch Size: {batch_size}, LR: {lr}, Optimizer: {optim_type}Seed: {seed}"
     )
     print("================================")
 
@@ -35,7 +36,8 @@ def train(
     model.cuda()
     model.train()
 
-    optimizer = optim.Adam(params=model.parameters(), lr=lr)
+    optimizer = Optimizer(model, optim_type_=optim_type, lr=lr)
+    # optimizer = optim.Adam(params=model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss()
 
     for epoch in range(epochs):
@@ -55,7 +57,7 @@ def train(
                 avg_loss, avg_acc = validate(model, validloader, criterion)
 
         if save_path:
-            name = f"{model_type}_epoch{epoch:0>2d}_lr{lr}_transform{transform_type}_loss{avg_loss:.4f}_acc{avg_acc:.4f}_seed{seed}.pth"
+            name = f"{model_type}_epoch{epoch:0>2d}_lr{lr}_transform{transform_type}_optim{optim_type}_loss{avg_loss:.4f}_acc{avg_acc:.4f}_seed{seed}.pth"
             torch.save(model.state_dict(), os.path.join(save_path, name))
 
 

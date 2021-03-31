@@ -9,11 +9,11 @@ from model import load_model
 from config import Config
 
 
-LOAD_STATE_DICT = "./saved_models/VanillaResNet_epoch26_lr0.00025_transformbase_loss0.0037_acc0.8436_seed42.pth"
+LOAD_STATE_DICT = "./saved_models/VanillaEfficientNet_epoch00_lr0.0005_transformbase_optimadam_loss0.0048_acc0.8244_seed42.pth"
 
     
 def predict(
-    model_type: str = Config.VanillaResNet,
+    model_type: str = Config.VanillaEfficientNet,
     load_state_dict: str = LOAD_STATE_DICT,
     transform_type: str = Config.BaseTransform,
     data_root: str = Config.Test,
@@ -55,7 +55,7 @@ def predict(
 
 
 def submit(
-    model_type: str = Config.VanillaResNet,
+    model_type: str = Config.VanillaEfficientNet,
     load_state_dict: str = LOAD_STATE_DICT,
     transform_type: str = Config.BaseTransform,
     data_root: str = Config.Eval,

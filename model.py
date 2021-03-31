@@ -3,11 +3,11 @@ from torch import nn
 from torchvision import models
 from efficientnet_pytorch import EfficientNet
 
-def load_model(model_type: str, load_state_dict: str):
+def load_model(model_type: str, load_state_dict: str, freeze: bool=False):
     if model_type == "VanillaResNet":
-        model = VanillaResNet()
+        model = VanillaResNet(freeze)
     elif model_type == 'VanillaEfficientNet':
-        model = VanillaEfficientNet()
+        model = VanillaEfficientNet(freeze)
     else:
         raise NotImplementedError()
     if load_state_dict:
@@ -17,7 +17,7 @@ def load_model(model_type: str, load_state_dict: str):
 
 
 class VanillaEfficientNet(nn.Module):
-    def __init__(self, freeze: bool = True):
+    def __init__(self, freeze: bool = False):
         super(VanillaEfficientNet, self).__init__()
         self.efficientnet = EfficientNet.from_pretrained('efficientnet-b3')
         if freeze:
@@ -35,7 +35,7 @@ class VanillaEfficientNet(nn.Module):
 
 
 class VanillaResNet(nn.Module):
-    def __init__(self, freeze: bool = True):
+    def __init__(self, freeze: bool = False):
         super(VanillaResNet, self).__init__()
         self.resnet = models.resnet101(pretrained=True)
         if freeze:

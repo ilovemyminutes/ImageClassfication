@@ -1,7 +1,8 @@
 import os
 from PIL import Image
 from torch.utils.data import DataLoader, Dataset
-from torchvision.datasets import ImageFolder
+from torchvision.datasets import DatasetFolder
+from torchvision.datasets.folder import default_loader, IMG_EXTENSIONS
 from transform_settings import configure_transform
 from utils import load_pickle
 from config import Config
@@ -18,17 +19,28 @@ def get_dataloader(
     transform = configure_transform(phase, transform_type)
 
     if phase in ["train", "valid", "test"]:
-        dataset = ImageFolder(data_root, transform)
+        dataset = CustomImageFolder(root=data_root, transform=transform)
         dataloader = DataLoader(
             dataset, batch_size=batch_size, shuffle=shuffle, drop_last=drop_last
         )
-    else:  # eval
+    else:
         dataset = EvalDataset(data_root, transform)
         dataloader = DataLoader(
             dataset, batch_size=batch_size, shuffle=shuffle, drop_last=drop_last
         )
 
     return dataloader
+
+
+class CustomImageFolder(DatasetFolder):
+    def __init__(self, root, transform=None, target_transform=None, loader=default_loader, is_valid_file=None):
+        args = (loader, IMG_EXTENSIONS, transform, target_transform, is_valid_file)
+        super(CustomImageFolder, self).__init__(root, *args)
+    def _find_classes(self, dir):
+        classes = [d.name for d in os.scandir(dir) if d.is_dir()]
+        classes.sort(key=lambda x: int(x))
+        class_to_idx = {classes[i]: i for i in range(len(classes))}
+        return classes, class_to_idx
 
 
 class EvalDataset(Dataset):
