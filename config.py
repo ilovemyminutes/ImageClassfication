@@ -9,8 +9,8 @@ class Config:
     Eval: str = "./input/data/eval/images"
 
     BatchSize: int = 128
-    LR: float = 5e-4
-    Epochs: int = 1
+    LR: float = 25e-5
+    Epochs: int = 30
     Seed: int = 42
 
     BaseTransform: str = "base"

@@ -9,11 +9,11 @@ from model import load_model
 from config import Config
 
 
-LOAD_STATE_DICT = "./saved_models/VanillaEfficientNet_epoch00_lr0.0005_transformbase_loss0.0043_acc0.8374_seed42.pth"
+LOAD_STATE_DICT = "./saved_models/VanillaResNet_epoch26_lr0.00025_transformbase_loss0.0037_acc0.8436_seed42.pth"
 
     
 def predict(
-    model_type: str = Config.VanillaEfficientNet,
+    model_type: str = Config.VanillaResNet,
     load_state_dict: str = LOAD_STATE_DICT,
     transform_type: str = Config.BaseTransform,
     data_root: str = Config.Test,
@@ -55,7 +55,7 @@ def predict(
 
 
 def submit(
-    model_type: str = Config.VanillaEfficientNet,
+    model_type: str = Config.VanillaResNet,
     load_state_dict: str = LOAD_STATE_DICT,
     transform_type: str = Config.BaseTransform,
     data_root: str = Config.Eval,
@@ -78,10 +78,10 @@ def submit(
         id_list = []
         pred_list = []
         for img_id, img in tqdm(dataloader, desc="Inference"):
-            img_id, img = img_id[0], img.cuda()
+            img = img.cuda()
             output = model(img)
             _, pred = torch.max(output, 1)
-            id_list.append(img_id)
+            id_list.append(img_id[0])
             pred_list.append(pred.item())
 
     prediction = pd.DataFrame(dict(ImageID=id_list, ans=pred_list))

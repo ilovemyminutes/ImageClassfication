@@ -12,6 +12,7 @@ def load_model(model_type: str, load_state_dict: str):
         raise NotImplementedError()
     if load_state_dict:
         model.load_state_dict(torch.load(load_state_dict))
+        print(f'Loaded pretrained weights from {load_state_dict}')
     return model
 
 
@@ -30,7 +31,7 @@ class VanillaEfficientNet(nn.Module):
 
     def _freeze(self):
         for param in self.efficientnet.parameters():
-            param.require_grad = False
+            param.requires_grad = False
 
 
 class VanillaResNet(nn.Module):

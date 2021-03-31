@@ -11,7 +11,7 @@ from utils import set_seed
 
 
 def train(
-    model_type: str = Config.VanillaEfficientNet,
+    model_type: str = Config.VanillaResNet,
     data_root: str = Config.Train,
     transform_type: str = Config.BaseTransform,
     epochs: int = Config.Epochs,
