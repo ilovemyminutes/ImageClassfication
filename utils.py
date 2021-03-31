@@ -1,5 +1,6 @@
 import json
 import random
+import pickle
 import numpy as np
 import torch
 
@@ -23,13 +24,21 @@ class AverageMeter(object):
         self.avg = self.sum / self.count
 
 
+def save_pickle(path: str, f: object) -> None:
+    with open(path, "wb") as handle:
+        pickle.dump(f, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+def load_pickle(path: str):
+    with open(path, "rb") as pkl_file:
+        output = pickle.load(pkl_file)
+    return output
+
 def save_json(path: str, f: object) -> None:
     with open(path, "w") as json_path:
         json.dump(
             f,
             json_path,
         )
-
 
 def load_json(path: str) -> dict:
     with open(path, "r") as json_file:

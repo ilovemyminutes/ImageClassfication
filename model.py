@@ -1,17 +1,38 @@
 import torch
 from torch import nn
 from torchvision import models
+from efficientnet_pytorch import EfficientNet
 
 def load_model(model_type: str, load_state_dict: str):
     if model_type == "VanillaResNet":
         model = VanillaResNet()
+    elif model_type == 'VanillaEfficientNet':
+        model = VanillaEfficientNet()
     else:
         raise NotImplementedError()
     if load_state_dict:
         model.load_state_dict(torch.load(load_state_dict))
-
+        print(f'Loaded pretrained weights from {load_state_dict}')
     return model
-    
+
+
+class VanillaEfficientNet(nn.Module):
+    def __init__(self, freeze: bool = True):
+        super(VanillaEfficientNet, self).__init__()
+        self.efficientnet = EfficientNet.from_pretrained('efficientnet-b3')
+        if freeze:
+            self._freeze()
+        self.linear = nn.Linear(in_features=1000, out_features=18)
+
+    def forward(self, x):
+        output = self.efficientnet(x)
+        output = self.linear(output)
+        return output
+
+    def _freeze(self):
+        for param in self.efficientnet.parameters():
+            param.requires_grad = False
+
 
 class VanillaResNet(nn.Module):
     def __init__(self, freeze: bool = True):
