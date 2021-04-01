@@ -33,3 +33,24 @@ def Optimizer(model: nn.Module, optim_type_: str, lr: float):
     elif optim_type_ == 'sgd':
         optimizer = optim.SGD(model.parameters(), lr=lr)
     return optimizer
+
+
+class LabelEncoder:
+    Encoder= {
+        'mask': {'incorrect': 0, 'wear': 1, 'not_wear': 2},
+        'gender': {'male': 0, 'female': 1}
+        }
+    Decoder= {
+        'mask': {0: 'incorrect', 1:'wear', 2:'not_wear'},
+        'gender': {0:'male', 1:'female'}
+        }
+        
+    def transform(self, label, task: str='mask'):
+        output = self.Encoder[task][label]
+        return output
+    
+    def inverse_transform(self, label, task: str='mask'):
+        output = self.Decoder[task][label]
+        return output
+    
+
