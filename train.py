@@ -5,12 +5,13 @@ from torch import nn, optim
 from torch.nn import functional as F
 import fire
 from model import load_model
-from config import Config, Optimizer
+from config import Config, Optimizer, Task, N_CLASS
 from dataset import get_dataloader
 from utils import set_seed
 
 
 def train(
+    task: str=Task.Mask,
     model_type: str = Config.VanillaEfficientNet,
     data_root: str = Config.Train,
     transform_type: str = Config.BaseTransform,
@@ -22,23 +23,22 @@ def train(
     save_path: str = Config.ModelPath,
     seed: int = Config.Seed,
 ):
-    print("============Settings============")
+    print("="*100)
     print(
         f"Model: {model_type}, Load: {load_state_dict}, Transform Type: {transform_type}, Epochs: {epochs}, Batch Size: {batch_size}, LR: {lr}, Optimizer: {optim_type}Seed: {seed}"
     )
-    print("================================")
+    print("="*100)
 
     set_seed(seed)
-    trainloader = get_dataloader("train", data_root, transform_type, batch_size)
-    validloader = get_dataloader("valid", data_root, transform_type, batch_size)
+    trainloader = get_dataloader(task, "train", data_root, transform_type, batch_size)
+    validloader = get_dataloader(task, "valid", data_root, transform_type, batch_size)
 
-    model = load_model(model_type, load_state_dict)
+    model = load_model(model_type, N_CLASS[task], load_state_dict)
     model.cuda()
     model.train()
 
     optimizer = Optimizer(model, optim_type_=optim_type, lr=lr)
-    # optimizer = optim.Adam(params=model.parameters(), lr=lr)
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.CrossEntropyLoss() if task != Task.Age else nn.MSELoss()
 
     for epoch in range(epochs):
         print(f"Epoch: {epoch}")
@@ -53,7 +53,7 @@ def train(
             loss.backward()
             optimizer.step()
 
-            if idx != 0 and idx % 100 == 0:
+            if idx != 0 and idx % 60 == 0:
                 avg_loss, avg_acc = validate(model, validloader, criterion)
 
         if save_path:

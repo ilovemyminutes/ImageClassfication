@@ -6,7 +6,9 @@ input/data/train/images/*.csv
 input/data/train/*
 input/data/*
 preprocessed/*/*
+preprocessed/*
 prediction/*/*
+preprocessed_deprecated/*/*
 
 # Model Params
 saved_models/*.pth
