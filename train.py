@@ -25,7 +25,7 @@ def train(
 ):
     print("="*100)
     print(
-        f"Model: {model_type}, Load: {load_state_dict}, Transform Type: {transform_type}, Epochs: {epochs}, Batch Size: {batch_size}, LR: {lr}, Optimizer: {optim_type}Seed: {seed}"
+        f"Model: {model_type}, Load: {load_state_dict}, Transform Type: {transform_type}, Epochs: {epochs}, Batch Size: {batch_size}, LR: {lr}, Optimizer: {optim_type} Seed: {seed}"
     )
     print("="*100)
 
@@ -53,7 +53,7 @@ def train(
             loss.backward()
             optimizer.step()
 
-            if idx != 0 and idx % 60 == 0:
+            if idx != 0 and idx % 100 == 0:
                 avg_loss, avg_acc = validate(model, validloader, criterion)
 
         if save_path:
