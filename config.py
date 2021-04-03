@@ -14,7 +14,7 @@ class Config:
     LR: float = 5e-3
     Adam: str = 'adam'
     SGD: str = 'sgd'
-    Epochs: int = 30
+    Epochs: int = 5
     Seed: int = 42
 
     BaseTransform: str = "base"

@@ -3,7 +3,6 @@ import random
 import pickle
 import numpy as np
 import torch
-from varname import nameof
 
 
 def save_pickle(path: str, f: object) -> None:
@@ -26,12 +25,6 @@ def load_json(path: str) -> dict:
     with open(path, "r") as json_file:
         output = json.load(json_file)
     return output
-
-def verbose(*args):
-    output = ''
-    for arg in args:
-        output += f"{nameof(arg): arg}  " 
-    print(output)
 
 
 def set_seed(seed: int = 42, contain_cuda: bool = False):
