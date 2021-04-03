@@ -1,27 +1,28 @@
+import argparse
 import os
 import math
 from tqdm import tqdm
 import torch
 from torch import nn
 from torch.nn import functional as F
-import fire
+# import fire
+
 from model import load_model
-from config import Config, Optimizer, Task, get_class_num
+from config import Config, get_optim, Task, get_class_num
 from dataset import get_dataloader
 from utils import set_seed, verbose
-import wandb
 
 
 def train(
     task: str=Task.Age,
     model_type: str = Config.VanillaEfficientNet,
+    load_state_dict: str = None,
     data_root: str = Config.Train,
     transform_type: str = Config.BaseTransform,
     epochs: int = Config.Epochs,
     batch_size: int = Config.BatchSize,
-    lr: float = Config.LR,
     optim_type: str = Config.Adam,
-    load_state_dict: str = None,
+    lr: float = Config.LR,
     save_path: str = Config.ModelPath,
     seed: int = Config.Seed,
 ):
@@ -38,7 +39,7 @@ def train(
     model.cuda()
     model.train()
 
-    optimizer = Optimizer(model, optim_type_=optim_type, lr=lr)
+    optimizer = get_optim(model, optim_type_=optim_type, lr=lr)
 
     if task != Task.Age: # main, ageg, mask, gender
         criterion = nn.CrossEntropyLoss()
@@ -154,6 +155,25 @@ def validate(task, model, validloader, criterion):
         return mse, rmse
     
 
-
 if __name__ == "__main__":
-    fire.Fire({"run": train})
+    import wandb
+    wandb.init()
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--task', type=str, default=Task.Main, help=f"choose task among 'main', 'age', 'ageg', 'gender', 'mask' (default: {Task.Main})")
+    parser.add_argument('--model-type', type=str, default=Config.VanillaEfficientNet, help=f'model type for train (default: {Config.VanillaEfficientNet})')
+    parser.add_argument('--load-state-dict', type=dict, default=None, help=f'random seed (default: None)')
+    parser.add_argument('--data-root', type=str, default=Config.Train, help=f"data directory for train (default: {Config.Train})")
+    parser.add_argument('--transform-type', type=str, default=Config.BaseTransform, help=f'transform type for train (default: {Config.BaseTransform})')
+    parser.add_argument('--epochs', type=int, default=Config.Epochs, help=f'number of epochs to train (default: {Config.Epochs})')
+    parser.add_argument('--batch-size', type=int, default=Config.BatchSize, metavar='N', help=f'input batch size for training (default: {Config.BatchSize})')
+    parser.add_argument('--optim-type', type=str, default=Config.Adam, help=f'optimizer type (default: {Config.Adam})')
+    parser.add_argument('--lr', type=float, default=Config.LR, help=f'learning rate (default: {Config.LR})')
+    parser.add_argument('--seed', type=int, default=Config.Seed, help=f'random seed (default: {Config.Seed})')
+    parser.add_argument('--seed', type=int, default=Config.Seed, help=f'random seed (default: {Config.Seed})')
+    parser.add_argument('--save-path', type=str, default=Config.ModelPath, help=f'random seed (default: {Config.ModelPath})')
+    
+    args = parser.parse_args()
+    wandb.config.update(args) # adds all of the arguments as config variables
+
+    train(args)

@@ -6,8 +6,7 @@ from torch.nn import functional as F
 import fire
 from dataset import get_dataloader
 from model import load_model
-from config import Config, Task, N_CLASS
-
+from config import Config, Task, get_class_num
 
 LOAD_STATE_DICT = "./saved_models/VanillaEfficientNet_epoch00_lr0.005_transformbase_optimadam_loss0.0009_acc0.9864_seed42.pth"
 
@@ -15,12 +14,17 @@ LOAD_STATE_DICT = "./saved_models/VanillaEfficientNet_epoch00_lr0.005_transformb
 def predict(
     task: str=Task.Age,
     model_type: str = Config.VanillaEfficientNet,
-    load_state_dict: str = LOAD_STATE_DICT,
+    load_state_dict: str = None,
     transform_type: str = Config.BaseTransform,
     data_root: str = Config.Test,
     save_path: str = Config.Inference,
 ):
-    model = load_model(model_type, N_CLASS[task], load_state_dict)
+    if load_state_dict is None:
+        load_state_dict = LOAD_STATE_DICT
+
+    n_classes = get_class_num(task)
+    model = load_model(model_type, n_classes, load_state_dict)
+
     model.cuda()
     model.eval()
 
@@ -56,7 +60,7 @@ def predict(
         )
 
 
-def submit(
+def predict_submission(
     model_type: str = Config.VanillaEfficientNet,
     load_state_dict: str = LOAD_STATE_DICT,
     transform_type: str = Config.BaseTransform,
@@ -97,4 +101,4 @@ def submit(
 
 
 if __name__ == "__main__":
-    fire.Fire({"eval": submit, "pred": predict})
+    fire.Fire({"eval": predict_submission, "pred": predict})
