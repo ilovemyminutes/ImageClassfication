@@ -1,0 +1,5 @@
+[default]
+entity = iloveslowfood
+project = pstage-imageclf
+base_url = https://api.wandb.ai
+

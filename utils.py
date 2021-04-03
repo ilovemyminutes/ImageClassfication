@@ -3,25 +3,7 @@ import random
 import pickle
 import numpy as np
 import torch
-
-
-class AverageMeter(object):
-    """Computes and stores the average and current value"""
-
-    def __init__(self):
-        self.reset()
-
-    def reset(self):
-        self.val = 0
-        self.avg = 0
-        self.sum = 0
-        self.count = 0
-
-    def update(self, val, n=1):
-        self.val = val
-        self.sum += val * n
-        self.count += n
-        self.avg = self.sum / self.count
+from varname import nameof
 
 
 def save_pickle(path: str, f: object) -> None:
@@ -45,6 +27,12 @@ def load_json(path: str) -> dict:
         output = json.load(json_file)
     return output
 
+def verbose(*args):
+    output = ''
+    for arg in args:
+        output += f"{nameof(arg): arg}  " 
+    print(output)
+
 
 def set_seed(seed: int = 42, contain_cuda: bool = False):
     random.seed(seed)
@@ -58,3 +46,22 @@ def set_seed(seed: int = 42, contain_cuda: bool = False):
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
     print(f"Seed set as {seed}")
+
+
+class AverageMeter(object):
+    """Computes and stores the average and current value"""
+
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.val = 0
+        self.avg = 0
+        self.sum = 0
+        self.count = 0
+
+    def update(self, val, n=1):
+        self.val = val
+        self.sum += val * n
+        self.count += n
+        self.avg = self.sum / self.count

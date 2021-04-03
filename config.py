@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from torch import optim, nn
 
 
+
 @dataclass
 class Config:
     Train: str = "./preprocessed/train"
@@ -10,10 +11,10 @@ class Config:
     Eval: str = "./input/data/eval/images"
 
     BatchSize: int = 64
-    LR: float = 5e-4
+    LR: float = 5e-3
     Adam: str = 'adam'
     SGD: str = 'sgd'
-    Epochs: int = 10
+    Epochs: int = 30
     Seed: int = 42
 
     BaseTransform: str = "base"
@@ -24,7 +25,20 @@ class Config:
     ModelPath: str = "./saved_models"
 
     Inference: str = "./prediction"
-    Info: str = "./preprocessed/info.pkl"
+    Metadata: str = './preprocessed/metadata.json'
+
+
+class Task:
+    Mask: str='mask'
+    Gender: str='gender'
+    Age: str='age'
+    Ageg: str='ageg'
+    Main: str='main'
+
+
+def get_class_num(task):
+    num_class_meta = {'mask': 3, 'gender': 2, 'age':1, 'ageg':3, 'main': 18}
+    return num_class_meta[task]
 
 
 def Optimizer(model: nn.Module, optim_type_: str, lr: float):
@@ -33,3 +47,5 @@ def Optimizer(model: nn.Module, optim_type_: str, lr: float):
     elif optim_type_ == 'sgd':
         optimizer = optim.SGD(model.parameters(), lr=lr)
     return optimizer
+    
+
