@@ -26,187 +26,80 @@ def train(
     seed: int = Config.Seed,
 ):
     set_seed(seed)
-    # trainloader = get_dataloader(task, "train", data_root, transform_type, batch_size)
-    # validloader = get_dataloader(task, "valid", data_root, transform_type, 1024)
-
-    trainloader = get_dataloader('age', "train", data_root, transform_type, batch_size)
-    validloader = get_dataloader('age', "valid", data_root, transform_type, 1024)
+    trainloader = get_dataloader(task, "train", data_root, transform_type, batch_size)
+    validloader = get_dataloader(task, "valid", data_root, transform_type, 1024)
 
     n_classes = get_class_num(task) if task != Task.All else None
     model = load_model(model_type, n_classes, load_state_dict)
     model.cuda()
     model.train()
 
-    if model_type not in  [Config.THANet_MK1, Config.THANet_MK2]:
-        optimizer = get_optim(model, optim_type_=optim_type, lr=lr)
-    else:
-        optim_mask = optim.Adam(model.linear_mask.parameters(), lr=lr)
-        optim_gender = optim.Adam(model.linear_gender.parameters(), lr=lr)
-        optim_ageg = optim.Adam(model.linear_ageg.parameters(), lr=lr)
-        optim_main = optim.Adam(model.parameters(), lr=lr)
-
-        optim_mask_interaction = optim.Adam(list(model.backbone.parameters()) + list(model.linear_mask.parameters()), lr=lr)
-        optim_ageg_interaction = optim.Adam(list(model.backbone.parameters()) + list(model.linear_ageg.parameters()), lr=lr)
-        optim_gender_interaction = optim.Adam(list(model.backbone.parameters()) + list(model.linear_gender.parameters()), lr=lr)
+    optimizer = get_optim(model, optim_type_=optim_type, lr=lr)
 
 
     # classification(main, ageg, mask, gender)
     if task != Task.Age:
 
-        if model_type not in  [Config.THANet_MK1, Config.THANet_MK2]:
-            criterion = nn.CrossEntropyLoss()
+        criterion = nn.CrossEntropyLoss()
 
-            for epoch in range(epochs):
-                print(f"Epoch: {epoch}")
+        for epoch in range(epochs):
+            print(f"Epoch: {epoch}")
 
-                total_loss = 0
-                total_corrects = 0
-                num_samples = 0
+            total_loss = 0
+            total_corrects = 0
+            num_samples = 0
 
-                for idx, (imgs, labels) in tqdm(enumerate(trainloader), desc="Train"):
-                    imgs = imgs.cuda()
-                    labels = labels.cuda()
+            for idx, (imgs, labels) in tqdm(enumerate(trainloader), desc="Train"):
+                imgs = imgs.cuda()
+                labels = labels.cuda()
 
-                    output = model(imgs)
-                    loss = criterion(output, labels)
-                    _, pred_labels = torch.max(output.data, dim=1)
+                output = model(imgs)
+                loss = criterion(output, labels)
+                _, pred_labels = torch.max(output.data, dim=1)
 
-                    total_corrects += (labels == pred_labels).sum().item()
-                    total_loss += loss
-                    num_samples += imgs.size(0)
+                total_corrects += (labels == pred_labels).sum().item()
+                total_loss += loss
+                num_samples += imgs.size(0)
 
-                    optimizer.zero_grad()
-                    loss.backward()
-                    optimizer.step()
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
 
-                    avg_loss = total_loss / num_samples
-                    avg_acc = total_corrects / num_samples
+                avg_loss = total_loss / num_samples
+                avg_acc = total_corrects / num_samples
 
-                    # logs during one epoch
-                    wandb.log(
-                        {
-                            f"Ep{epoch:0>2d} Train Accuracy": avg_acc,
-                            f"Ep{epoch:0>2d} Train Loss": avg_loss,
-                        }
-                    )
-
-                    if idx != 0 and idx % 100 == 0:
-                        val_loss, val_eval = validate(task, model_type, model, validloader, criterion)
-                        print(f"[Train] Avg Loss: {avg_loss:.4f} Avg Acc: {avg_acc:.4f}")
-                        wandb.log(
-                            {
-                                f"Ep{epoch:0>2d} Valid Accuracy": val_eval,
-                                f"Ep{epoch:0>2d} Valid Loss": val_loss,
-                            }
-                        )
-
-                # logs for one epoch in total
+                # logs during one epoch
                 wandb.log(
                     {
-                        "Train Accuracy": avg_acc,
-                        "Valid Accuracy": val_eval,
-                        "Train Loss": avg_loss,
-                        "Valid Loss": val_loss,
+                        f"Ep{epoch:0>2d} Train Accuracy": avg_acc,
+                        f"Ep{epoch:0>2d} Train Loss": avg_loss,
                     }
                 )
 
-                if save_path:
-                    name = f"{model_type}_task{task}_epoch{epoch:0>2d}_lr{lr}_transform{transform_type}_optim{optim_type}_loss{val_loss:.4f}_eval{val_eval:.4f}_seed{seed}.pth"
-                    torch.save(model.state_dict(), os.path.join(save_path, name))
-        else:
-            criterion = nn.CrossEntropyLoss()
-            for epoch in range(epochs):
-                print(f"Epoch: {epoch}")
-
-                total_loss = 0
-                total_corrects = 0
-                num_samples = 0
-
-                for idx, (imgs, labels) in tqdm(enumerate(trainloader), desc="Train"):
-                    imgs = imgs.cuda()
-
-                    output_mask, output_ageg, output_gender, output_main = model(imgs)
-
-                    loss_mask = criterion(output_mask, labels['mask'].cuda())
-                    loss_ageg = criterion(output_ageg, labels['ageg'].cuda())
-                    loss_gender = criterion(output_gender, labels['gender'].cuda())
-                    loss_main = criterion(output_main, labels['main'].cuda())
-                    loss_mask_interaction = criterion(output_mask, labels['mask'].cuda())
-                    loss_ageg_interaction = criterion(output_ageg, labels['ageg'].cuda())
-                    loss_gender_interaction = criterion(output_gender, labels['gender'].cuda())
-
-                    loss_mask *= 0.375
-                    loss_ageg *= 0.375
-                    loss_gender *= 0.375
-                    loss_main *= .5
-                    loss_mask_interaction *= 0.125
-                    loss_ageg_interaction *= 0.125
-                    loss_gender_interaction *= 0.125
-
-                    _, pred_labels = torch.max(output_main.data, dim=1)
-
-                    total_corrects += (labels['main'].cuda() == pred_labels).sum().item()
-                    total_loss += loss_main
-                    num_samples += imgs.size(0)
-
-                    optim_mask.zero_grad()
-                    optim_gender.zero_grad()
-                    optim_ageg.zero_grad()
-                    optim_main.zero_grad()
-                    optim_mask_interaction.zero_grad()
-                    optim_ageg_interaction.zero_grad()
-                    optim_gender_interaction.zero_grad()
-
-                    loss_mask_interaction.backward(retain_graph=True)
-                    loss_ageg_interaction.backward(retain_graph=True)
-                    loss_gender_interaction.backward(retain_graph=True)
-                    loss_mask.backward(retain_graph=True)
-                    loss_ageg.backward(retain_graph=True)
-                    loss_gender.backward(retain_graph=True)
-                    loss_main.backward()
-
-                    optim_mask.step()
-                    optim_gender.step()
-                    optim_ageg.step()
-                    optim_main.step()
-                    optim_mask_interaction.step()
-                    optim_ageg_interaction.step()
-                    optim_gender_interaction.step()
-
-                    avg_loss = total_loss / num_samples
-                    avg_acc = total_corrects / num_samples
-
-                    # logs during one epoch
+                if idx != 0 and idx % 100 == 0:
+                    val_loss, val_eval = validate(task, model_type, model, validloader, criterion)
+                    print(f"[Train] Avg Loss: {avg_loss:.4f} Avg Acc: {avg_acc:.4f}")
                     wandb.log(
                         {
-                            f"Ep{epoch:0>2d} Train Accuracy": avg_acc,
-                            f"Ep{epoch:0>2d} Train Loss": avg_loss,
+                            f"Ep{epoch:0>2d} Valid Accuracy": val_eval,
+                            f"Ep{epoch:0>2d} Valid Loss": val_loss,
                         }
                     )
 
-                    if idx != 0 and idx % 100 == 0:
-                        val_loss, val_eval = validate(task, model_type, model, validloader, criterion)
-                        print(f"[Train] Avg Loss: {avg_loss:.4f} Avg Acc: {avg_acc:.4f}")
-                        wandb.log(
-                            {
-                                f"Ep{epoch:0>2d} Valid Accuracy": val_eval,
-                                f"Ep{epoch:0>2d} Valid Loss": val_loss,
-                            }
-                        )
+            # logs for one epoch in total
+            wandb.log(
+                {
+                    "Train Accuracy": avg_acc,
+                    "Valid Accuracy": val_eval,
+                    "Train Loss": avg_loss,
+                    "Valid Loss": val_loss,
+                }
+            )
 
-                # logs for one epoch in total
-                wandb.log(
-                    {
-                        "Train Accuracy": avg_acc,
-                        "Valid Accuracy": val_eval,
-                        "Train Loss": avg_loss,
-                        "Valid Loss": val_loss,
-                    }
-                )
-
-                if save_path:
-                    name = f"{model_type}_task{task}_epoch{epoch:0>2d}_lr{lr}_transform{transform_type}_optim{optim_type}_loss{val_loss:.4f}_eval{val_eval:.4f}_seed{seed}.pth"
-                    torch.save(model.state_dict(), os.path.join(save_path, name))
+            if save_path:
+                name = f"{model_type}_task{task}_epoch{epoch:0>2d}_lr{lr}_transform{transform_type}_optim{optim_type}_loss{val_loss:.4f}_eval{val_eval:.4f}_seed{seed}.pth"
+                torch.save(model.state_dict(), os.path.join(save_path, name))
+            
 
     # regression(age)
     else:
@@ -277,60 +170,34 @@ def train(
                 torch.save(model.state_dict(), os.path.join(save_path, name))
 
 
-def validate(task, model_type, model, validloader, criterion):
+def validate(task, model, validloader, criterion):
 
     if task != Task.Age:
-        if model_type not in [Config.THANet_MK1, Config.THANet_MK2]:
-            total_loss = 0
-            total_corrects = 0
-            num_samples = 0
+        total_loss = 0
+        total_corrects = 0
+        num_samples = 0
 
-            with torch.no_grad():
-                model.eval()
-                for imgs, labels in tqdm(validloader, desc="Valid"):
-                    imgs = imgs.cuda()
-                    labels = labels.cuda()
+        with torch.no_grad():
+            model.eval()
+            for imgs, labels in tqdm(validloader, desc="Valid"):
+                imgs = imgs.cuda()
+                labels = labels.cuda()
 
-                    output = model(imgs)
-                    loss = criterion(output, labels).item()
-                    _, pred_labels = torch.max(output.data, dim=1)
+                output = model(imgs)
+                loss = criterion(output, labels).item()
+                _, pred_labels = torch.max(output.data, dim=1)
 
-                    total_corrects += (labels == pred_labels).sum().item()
-                    total_loss += loss
-                    num_samples += imgs.size(0)
+                total_corrects += (labels == pred_labels).sum().item()
+                total_loss += loss
+                num_samples += imgs.size(0)
 
-                avg_loss = total_loss / num_samples
-                avg_acc = total_corrects / num_samples
-                print(f"[Valid] Avg Loss: {avg_loss:.4f} Avg Acc: {avg_acc:.4f}")
-                model.train()
+            avg_loss = total_loss / num_samples
+            avg_acc = total_corrects / num_samples
+            print(f"[Valid] Avg Loss: {avg_loss:.4f} Avg Acc: {avg_acc:.4f}")
+            model.train()
 
-            return avg_loss, avg_acc
-        else:
-            total_loss = 0
-            total_corrects = 0
-            num_samples = 0
-
-            with torch.no_grad():
-                model.eval()
-                for imgs, labels in tqdm(validloader, desc="Valid"):
-                    imgs = imgs.cuda()
-                    labels = labels['main'].cuda()
-
-                    _, _, _, output = model(imgs)
-                    loss = criterion(output, labels).item()
-                    _, pred_labels = torch.max(output.data, dim=1)
-
-                    total_corrects += (labels == pred_labels).sum().item()
-                    total_loss += loss
-                    num_samples += imgs.size(0)
-
-                avg_loss = total_loss / num_samples
-                avg_acc = total_corrects / num_samples
-                print(f"[Valid] Avg Loss: {avg_loss:.4f} Avg Acc: {avg_acc:.4f}")
-                model.train()
-
-            return avg_loss, avg_acc
-
+        return avg_loss, avg_acc
+            
     else:  # main, mask, ageg, gender
         mse_raw = 0
         rmse_raw = 0
