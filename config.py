@@ -41,7 +41,7 @@ def get_class_num(task):
     return num_class_meta[task]
 
 
-def Optimizer(model: nn.Module, optim_type_: str, lr: float):
+def get_optim(model: nn.Module, optim_type_: str, lr: float):
     if optim_type_ == 'adam':
         optimizer = optim.Adam(model.parameters(), lr=lr)
     elif optim_type_ == 'sgd':
