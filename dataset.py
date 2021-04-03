@@ -47,7 +47,10 @@ class TrainDataset(Dataset):
     def __getitem__(self, index):
         name = os.path.basename(self.img_paths[index])
         img = Image.open(self.img_paths[index])
-        label = self.metadata[name][self.task]
+        if self.task == 'all':
+            label = self.metadata[name]
+        else:
+            label = self.metadata[name][self.task]
 
         if self.transform is not None:
             img = self.transform(img)

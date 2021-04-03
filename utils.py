@@ -3,7 +3,14 @@ import random
 import pickle
 import numpy as np
 import torch
+import datetime
 
+
+def get_timestamp():
+    KST = datetime.timezone(datetime.timedelta(hours=9))
+    now = datetime.datetime.now(tz=KST)
+    now2str = now.strftime("%Y/%d/%m %H:%M:%S")
+    return now2str
 
 def save_pickle(path: str, f: object) -> None:
     with open(path, "wb") as handle:
