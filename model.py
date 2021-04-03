@@ -42,7 +42,6 @@ class VanillaResNet(nn.Module):
         if freeze:
             self._freeze()
         self.resnet.fc = nn.Linear(in_features=2048, out_features=n_class)
-        # self._initialize()
 
     def forward(self, x):
         output = self.resnet(x)
@@ -52,7 +51,3 @@ class VanillaResNet(nn.Module):
         for name, param in self.resnet.named_parameters():
             if name not in ["fc.weight", "fc.bias"]:
                 param.requires_grad = False
-
-    # def _initialize(self):
-    #     torch.nn.init.xavier_uniform_(self.resnet.fc.weight)
-    #     self.resnet.fc.bias.data.fill_(0.01)

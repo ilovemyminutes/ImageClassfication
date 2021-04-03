@@ -6,7 +6,7 @@ from torchvision.datasets import DatasetFolder
 from torchvision.datasets.folder import default_loader, IMG_EXTENSIONS
 from transform_settings import configure_transform
 from utils import load_pickle, load_json
-from config import Config
+from config import Config, Task
 
 
 def get_dataloader(
@@ -35,8 +35,8 @@ def get_dataloader(
     return dataloader
 
 
-class TrainDataset:
-    def __init__(self, root: str, transform=None, task: str='class', meta_path:str=None):
+class TrainDataset(Dataset):
+    def __init__(self, root: str, transform=None, task: str=Task.Main, meta_path:str=None):
         """마스크 상태, 나이, 나이대, 클래스(0~17)의 4가지 태스크에 따른 레이블링을 지원하는 데이터셋
         """
         self.img_paths = glob(os.path.join(root, '*'))

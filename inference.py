@@ -13,7 +13,7 @@ LOAD_STATE_DICT = "./saved_models/VanillaEfficientNet_epoch00_lr0.005_transformb
 
     
 def predict(
-    task: str=Task.Mask,
+    task: str=Task.Age,
     model_type: str = Config.VanillaEfficientNet,
     load_state_dict: str = LOAD_STATE_DICT,
     transform_type: str = Config.BaseTransform,
