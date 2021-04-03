@@ -6,14 +6,8 @@ from torch.nn import functional as F
 import fire
 from dataset import get_dataloader
 from model import load_model
-<<<<<<< HEAD
 from config import Config, Task, get_class_num
 
-=======
-from config import Config, Task, N_CLASS
-
-
->>>>>>> 62db071f7d1d5cbc3ca084093bd24f2fe65940f5
 LOAD_STATE_DICT = "./saved_models/VanillaEfficientNet_epoch00_lr0.005_transformbase_optimadam_loss0.0009_acc0.9864_seed42.pth"
 
     
@@ -25,15 +19,12 @@ def predict(
     data_root: str = Config.Test,
     save_path: str = Config.Inference,
 ):
-<<<<<<< HEAD
     if load_state_dict is None:
         load_state_dict = LOAD_STATE_DICT
 
     n_classes = get_class_num(task)
     model = load_model(model_type, n_classes, load_state_dict)
-=======
-    model = load_model(model_type, N_CLASS[task], load_state_dict)
->>>>>>> 62db071f7d1d5cbc3ca084093bd24f2fe65940f5
+
     model.cuda()
     model.eval()
 
