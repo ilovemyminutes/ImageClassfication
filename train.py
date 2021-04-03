@@ -13,8 +13,8 @@ from utils import set_seed, get_timestamp
 
 
 def train(
-    task: str = Task.All, # 수행할 태스크(분류-메인 태스크, 마스크 상태, 연령대, 성별, 회귀-나이)
-    model_type: str = Config.THANet_MK1, # 불러올 모델명
+    task: str = Task.AgeC, # 수행할 태스크(분류-메인 태스크, 마스크 상태, 연령대, 성별, 회귀-나이)
+    model_type: str = Config.VanillaEfficientNet, # 불러올 모델명
     load_state_dict: str = None, # 학습 이어서 할 경우 저장된 파라미터 경로
     data_root: str = Config.Train, # 데이터 경로
     transform_type: str = Config.BaseTransform, # 적용할 transform
@@ -26,15 +26,18 @@ def train(
     seed: int = Config.Seed,
 ):
     set_seed(seed)
-    trainloader = get_dataloader(task, "train", data_root, transform_type, batch_size)
-    validloader = get_dataloader(task, "valid", data_root, transform_type, 1024)
+    # trainloader = get_dataloader(task, "train", data_root, transform_type, batch_size)
+    # validloader = get_dataloader(task, "valid", data_root, transform_type, 1024)
+
+    trainloader = get_dataloader('age', "train", data_root, transform_type, batch_size)
+    validloader = get_dataloader('age', "valid", data_root, transform_type, 1024)
 
     n_classes = get_class_num(task) if task != Task.All else None
     model = load_model(model_type, n_classes, load_state_dict)
     model.cuda()
     model.train()
 
-    if model_type != Config.THANet_MK1:
+    if model_type not in  [Config.THANet_MK1, Config.THANet_MK2]:
         optimizer = get_optim(model, optim_type_=optim_type, lr=lr)
     else:
         optim_mask = optim.Adam(model.linear_mask.parameters(), lr=lr)
@@ -49,7 +52,8 @@ def train(
 
     # classification(main, ageg, mask, gender)
     if task != Task.Age:
-        if model_type != Config.THANet_MK1:
+
+        if model_type not in  [Config.THANet_MK1, Config.THANet_MK2]:
             criterion = nn.CrossEntropyLoss()
 
             for epoch in range(epochs):
@@ -276,7 +280,7 @@ def train(
 def validate(task, model_type, model, validloader, criterion):
 
     if task != Task.Age:
-        if model_type != Config.THANet_MK1:
+        if model_type not in [Config.THANet_MK1, Config.THANet_MK2]:
             total_loss = 0
             total_corrects = 0
             num_samples = 0
@@ -355,8 +359,8 @@ def validate(task, model_type, model, validloader, criterion):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument( "--task", type=str, default=Task.All, help=f"choose task among 'main', 'age', 'ageg', 'gender', 'mask', 'all' (default: {Task.Main})")
-    parser.add_argument( "--model-type", type=str, default=Config.THANet_MK2, help=f"model type for train (default: {Config.THANet_MK2})")
+    parser.add_argument( "--task", type=str, default=Task.AgeC, help=f"choose task among 'main', 'age', 'ageg', 'gender', 'mask', 'all' (default: {Task.Main})")
+    parser.add_argument( "--model-type", type=str, default=Config.VanillaEfficientNet, help=f"model type for train (default: {Config.VanillaEfficientNet})")
     parser.add_argument( "--load-state-dict", type=str, default=None, help=f"(optional) state dict path for continuous train (default: None)")
     parser.add_argument( "--data-root", type=str, default=Config.Train, help=f"data directory for train (default: {Config.Train})")
     parser.add_argument( "--transform-type", type=str, default=Config.BaseTransform, help=f"transform type for train (default: {Config.BaseTransform})")

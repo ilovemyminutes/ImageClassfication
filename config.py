@@ -34,13 +34,14 @@ class Task:
     Mask: str='mask'
     Gender: str='gender'
     Age: str='age'
+    AgeC: str='age_clf'
     Ageg: str='ageg'
     Main: str='main'
     All: str='all'
 
 
 def get_class_num(task):
-    num_class_meta = {'mask': 3, 'gender': 2, 'age':1, 'ageg':3, 'main': 18}
+    num_class_meta = {'mask': 3, 'gender': 2, 'age':1, 'age_clf': 61, 'ageg':3, 'main': 18}
     return num_class_meta[task]
 
 
