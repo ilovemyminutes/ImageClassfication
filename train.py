@@ -1,16 +1,19 @@
 import os
+import math
 from tqdm import tqdm
 import torch
-from torch import nn, optim
+from torch import nn
 from torch.nn import functional as F
 import fire
 from model import load_model
-from config import Config, Optimizer
+from config import Config, Optimizer, Task, get_class_num
 from dataset import get_dataloader
-from utils import set_seed
+from utils import set_seed, verbose
+import wandb
 
 
 def train(
+    task: str=Task.Age,
     model_type: str = Config.VanillaEfficientNet,
     data_root: str = Config.Train,
     transform_type: str = Config.BaseTransform,
@@ -22,69 +25,134 @@ def train(
     save_path: str = Config.ModelPath,
     seed: int = Config.Seed,
 ):
-    print("============Settings============")
-    print(
-        f"Model: {model_type}, Load: {load_state_dict}, Transform Type: {transform_type}, Epochs: {epochs}, Batch Size: {batch_size}, LR: {lr}, Optimizer: {optim_type}Seed: {seed}"
-    )
-    print("================================")
+    print("="*100)
+    verbose(task, model_type, load_state_dict, transform_type, epochs, batch_size, lr, optim_type, seed)
+    print("="*100)
 
     set_seed(seed)
-    trainloader = get_dataloader("train", data_root, transform_type, batch_size)
-    validloader = get_dataloader("valid", data_root, transform_type, batch_size)
+    trainloader = get_dataloader(task, "train", data_root, transform_type, batch_size)
+    validloader = get_dataloader(task, "valid", data_root, transform_type, batch_size)
 
-    model = load_model(model_type, load_state_dict)
+    n_classes = get_class_num(task)
+    model = load_model(model_type, n_classes, load_state_dict)
     model.cuda()
     model.train()
 
     optimizer = Optimizer(model, optim_type_=optim_type, lr=lr)
-    # optimizer = optim.Adam(params=model.parameters(), lr=lr)
-    criterion = nn.CrossEntropyLoss()
 
-    for epoch in range(epochs):
-        print(f"Epoch: {epoch}")
-        for idx, (imgs, labels) in tqdm(enumerate(trainloader), desc="Train"):
-            imgs = imgs.cuda()
-            labels = labels.cuda()
+    if task != Task.Age: # main, ageg, mask, gender
+        criterion = nn.CrossEntropyLoss()
 
-            output = model(imgs)
-            loss = criterion(output, labels)
+        for epoch in range(epochs):
+            print(f"Epoch: {epoch}")
 
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-
-            if idx != 0 and idx % 100 == 0:
-                avg_loss, avg_acc = validate(model, validloader, criterion)
-
-        if save_path:
-            name = f"{model_type}_epoch{epoch:0>2d}_lr{lr}_transform{transform_type}_optim{optim_type}_loss{avg_loss:.4f}_acc{avg_acc:.4f}_seed{seed}.pth"
-            torch.save(model.state_dict(), os.path.join(save_path, name))
+            total_loss = 0
+            total_corrects = 0
+            num_samples = 0
 
 
-def validate(model, validloader, criterion):
-    total_loss = 0
-    total_corrects = 0
-    num_samples = 0
-    with torch.no_grad():
-        model.eval()
-        for imgs, labels in tqdm(validloader, desc="Valid"):
-            imgs = imgs.cuda()
-            labels = labels.cuda()
+            for idx, (imgs, labels) in tqdm(enumerate(trainloader), desc="Train"):
+                imgs = imgs.cuda()
+                labels = labels.cuda()
 
-            output = model(imgs)
-            loss = criterion(output, labels).item()
-            _, pred_labels = torch.max(output.data, dim=1)
+                output = model(imgs)
+                loss = criterion(output, labels)
+                _, pred_labels = torch.max(output.data, dim=1)
 
-            total_corrects += (labels == pred_labels).sum().item()
-            total_loss += loss
-            num_samples += imgs.size(0)
+                total_corrects += (labels == pred_labels).sum().item()
+                total_loss += loss
+                num_samples += imgs.size(0)
 
-        avg_loss = total_loss / num_samples
-        avg_acc = total_corrects / num_samples
-        print(f"[Valid] Avg Loss: {avg_loss:.4f} Avg Acc: {avg_acc:.4f}")
-        model.train()
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
 
-    return avg_loss, avg_acc
+                if idx != 0 and idx % 100 == 0:
+                    val_loss, val_eval = validate(task, model, validloader, criterion)
+                    temp_avg_loss = total_loss / num_samples
+                    temp_avg_acc = total_corrects / num_samples
+                    print(f"[Train] Avg Loss: {temp_avg_loss:.4f} Avg Acc: {temp_avg_acc:.4f}")
+
+            avg_loss = total_loss / num_samples
+            avg_acc = total_corrects / num_samples
+
+            if save_path:
+                name = f"{model_type}_task{task}_epoch{epoch:0>2d}_lr{lr}_transform{transform_type}_optim{optim_type}_loss{val_loss:.4f}_eval{val_eval:.4f}_seed{seed}.pth"
+                torch.save(model.state_dict(), os.path.join(save_path, name))
+        
+    else: # age
+        criterion = nn.MSELoss()
+
+        for epoch in range(epochs):
+            print(f"Epoch: {epoch}")
+            for idx, (imgs, labels) in tqdm(enumerate(trainloader), desc="Train"):
+                imgs = imgs.cuda()
+                labels = labels.float().cuda()
+
+                output = model(imgs)
+                loss = criterion(output, labels.unsqueeze(1))
+
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+
+                if idx != 0 and idx % 100 == 0:
+                    val_loss, val_eval = validate(task, model, validloader, criterion)
+
+            if save_path:
+                name = f"{model_type}_task{task}_epoch{epoch:0>2d}_lr{lr}_transform{transform_type}_optim{optim_type}_loss{val_loss:.4f}_eval{val_eval:.4f}_seed{seed}.pth"
+                torch.save(model.state_dict(), os.path.join(save_path, name))
+
+
+def validate(task, model, validloader, criterion):
+    
+    if task != Task.Age:
+        total_loss = 0
+        total_corrects = 0
+        num_samples = 0
+
+        with torch.no_grad():
+            model.eval()
+            for imgs, labels in tqdm(validloader, desc="Valid"):
+                imgs = imgs.cuda()
+                labels = labels.cuda()
+
+                output = model(imgs)
+                loss = criterion(output, labels).item()
+                _, pred_labels = torch.max(output.data, dim=1)
+
+                total_corrects += (labels == pred_labels).sum().item()
+                total_loss += loss
+                num_samples += imgs.size(0)
+
+            avg_loss = total_loss / num_samples
+            avg_acc = total_corrects / num_samples
+            print(f"[Valid] Avg Loss: {avg_loss:.4f} Avg Acc: {avg_acc:.4f}")
+            model.train()
+
+        return avg_loss, avg_acc
+
+    else: # main, mask, ageg, gender
+        mse = 0
+        rmse = 0
+        num_samples = 0
+
+        with torch.no_grad():
+            model.eval()
+            for imgs, labels in tqdm(validloader, desc="Valid"):
+                imgs = imgs.cuda()
+                labels = labels.float().cuda()
+
+                output = model(imgs)
+                mse += criterion(output, labels.unsqueeze(1)).item()
+                rmse += F.mse_loss(output, labels.unsqueeze(1)).item()
+            
+            rmse = math.sqrt(rmse)
+            print(f"[Valid] MSE Loss: {mse:.4f} RMSE: {rmse:.4f}")
+            model.train()
+        
+        return mse, rmse
+    
 
 
 if __name__ == "__main__":
