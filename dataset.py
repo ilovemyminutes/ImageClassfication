@@ -10,18 +10,18 @@ from config import Config, Task
 
 
 def get_dataloader(
-    task: str='class', # class, gender, ageg, age
+    task: str=Task.Main, # class, gender, ageg, age
     phase: str='train',
     data_root: str=Config.Train,
-    transform_type: str='base',
-    batch_size: int = 64,
+    transform_type: str=Config.BaseTransform,
+    batch_size: int = Config.BatchSize,
     shuffle: bool = True,
     drop_last: bool = True,
 ):
     transform = configure_transform(phase, transform_type)
 
     if phase in ["train", "valid", "test"]:
-        meta_path = Config.Metadata if os.path.isfile(Config.Metadata) else '../preprocessed/metadata.json'
+        meta_path = Config.Metadata # if os.path.isfile(Config.Metadata) else '../preprocessed/metadata.json'
         dataset = TrainDataset(root=data_root, transform=transform, task=task, meta_path=meta_path)
         dataloader = DataLoader(
             dataset, batch_size=batch_size, shuffle=shuffle, drop_last=drop_last
@@ -47,10 +47,10 @@ class TrainDataset(Dataset):
     def __getitem__(self, index):
         name = os.path.basename(self.img_paths[index])
         img = Image.open(self.img_paths[index])
-        if self.task == 'all':
-            label = self.metadata[name]
-        else:
-            label = self.metadata[name][self.task]
+        label = self.metadata[name]
+
+        if self.task != Task.All:
+            label = label[self.task]
 
         if self.transform is not None:
             img = self.transform(img)

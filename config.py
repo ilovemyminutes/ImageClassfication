@@ -22,6 +22,8 @@ class Config:
 
     VanillaResNet: str = "VanillaResNet"
     VanillaEfficientNet: str = "VanillaEfficientNet"
+    THANet_MK1: str = 'THANet_MK1'
+    THANet_MK2: str = 'THANet_MK2'
     ModelPath: str = "./saved_models"
 
     Inference: str = "./prediction"
@@ -34,6 +36,7 @@ class Task:
     Age: str='age'
     Ageg: str='ageg'
     Main: str='main'
+    All: str='all'
 
 
 def get_class_num(task):
