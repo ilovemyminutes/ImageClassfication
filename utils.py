@@ -3,8 +3,14 @@ import random
 import pickle
 import numpy as np
 import torch
-from varname import nameof
+import datetime
 
+
+def get_timestamp():
+    KST = datetime.timezone(datetime.timedelta(hours=9))
+    now = datetime.datetime.now(tz=KST)
+    now2str = now.strftime("%Y/%d/%m %H:%M:%S")
+    return now2str
 
 def save_pickle(path: str, f: object) -> None:
     with open(path, "wb") as handle:
@@ -26,12 +32,6 @@ def load_json(path: str) -> dict:
     with open(path, "r") as json_file:
         output = json.load(json_file)
     return output
-
-def verbose(*args):
-    output = ''
-    for arg in args:
-        output += f"{nameof(arg): arg}  " 
-    print(output)
 
 
 def set_seed(seed: int = 42, contain_cuda: bool = False):
