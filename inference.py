@@ -8,7 +8,7 @@ from dataset import get_dataloader
 from model import load_model
 from config import Config, Task, get_class_num
 
-LOAD_STATE_DICT = "./saved_models/VanillaEfficientNet_epoch00_lr0.005_transformbase_optimadam_loss0.0009_acc0.9864_seed42.pth"
+LOAD_STATE_DICT = "./saved_models/VanillaEfficientNet_task(main)ep(06)f1(0.7553)loss(0.0004)lr(0.005)trans(base)optim(adam)seed(42).pth"
 
     
 def predict(
@@ -61,13 +61,14 @@ def predict(
 
 
 def predict_submission(
+    task: str = Task.Main, 
     model_type: str = Config.VanillaEfficientNet,
     load_state_dict: str = LOAD_STATE_DICT,
     transform_type: str = Config.BaseTransform,
     data_root: str = Config.Eval,
     save_path: str = Config.Inference,
 ):
-    model = load_model(model_type, load_state_dict)
+    model = load_model(model_type, task, load_state_dict)
     model.cuda()
     model.eval()
 

@@ -14,7 +14,7 @@ from model import load_model
 from config import Config, Task
 from dataset import get_dataloader
 from utils import age2ageg, set_seed, get_timestamp
-from optimizers import get_optim
+from optims import get_optim
 
 import wandb
 
@@ -87,14 +87,14 @@ def train(
                 wandb.log(
                     {
                         f"Ep{epoch:0>2d} Train F1": train_f1,
-                        f"Ep{epoch:0>2d} Train Accuracy": train_acc,
+                        f"Ep{epoch:0>2d} Train ACC": train_acc,
                         f"Ep{epoch:0>2d} Train Loss": train_loss,
                     }
                 )
 
                 if idx != 0 and idx % 100 == 0:
                     valid_f1, valid_acc, valid_loss = validate(
-                        task, model_type, model, validloader, criterion
+                        task, model, validloader, criterion
                     )
 
                     print(
@@ -104,10 +104,11 @@ def train(
                         f"[Train] F1: {train_f1:.4f} ACC: {train_acc:.4f} Loss: {train_loss:.4f}"
                     )
 
+                    # logs during one epoch
                     wandb.log(
                         {
                             f"Ep{epoch:0>2d} Valid F1": valid_f1,
-                            f"Ep{epoch:0>2d} Valid Accuracy": valid_acc,
+                            f"Ep{epoch:0>2d} Valid ACC": valid_acc,
                             f"Ep{epoch:0>2d} Valid Loss": valid_loss,
                         }
                     )
@@ -117,8 +118,8 @@ def train(
                 {
                     "Train F1": train_f1,
                     "Valid F1": valid_f1,
-                    "Train Accuracy": train_acc,
-                    "Valid Accuracy": valid_acc,
+                    "Train ACC": train_acc,
+                    "Valid ACC": valid_acc,
                     "Train Loss": train_loss,
                     "Valid Loss": valid_loss,
                 }
@@ -236,7 +237,7 @@ def validate(task, model, validloader, criterion):
                 imgs = imgs.cuda()
 
                 output = model(imgs)
-                loss = criterion(output, labels).item()
+                loss = criterion(output, labels.cuda()).item()
                 _, preds = torch.max(output, dim=1)
 
                 pred_list.append(preds.data.cpu().numpy())
