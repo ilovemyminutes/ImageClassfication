@@ -22,8 +22,8 @@ class Config:
 
     VanillaResNet: str = "VanillaResNet"
     VanillaEfficientNet: str = "VanillaEfficientNet"
-    THANet_MK1: str = 'THANet_MK1'
-    THANet_MK2: str = 'THANet_MK2'
+    THANet_MK1: str = 'THANet_MK1' # wrong structure yet
+    THANet_MK2: str = 'THANet_MK2' # wrong structure yet
     ModelPath: str = "./saved_models"
 
     Inference: str = "./prediction"
