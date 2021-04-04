@@ -6,6 +6,15 @@ import torch
 import datetime
 
 
+@np.vectorize
+def age2ageg(age):
+    if age < 30:
+        return 0 # young
+    elif age >= 30 and age < 60:
+        return 1 # middle
+    else:
+        return 2 # old
+
 def get_timestamp():
     KST = datetime.timezone(datetime.timedelta(hours=9))
     now = datetime.datetime.now(tz=KST)

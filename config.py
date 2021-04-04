@@ -27,6 +27,7 @@ class Config:
     ModelPath: str = "./saved_models"
 
     Inference: str = "./prediction"
+    Info: str = './preprocessed/info.pkl'
     Metadata: str = './preprocessed/metadata.json'
 
 
@@ -43,13 +44,5 @@ class Task:
 def get_class_num(task):
     num_class_meta = {'mask': 3, 'gender': 2, 'age':1, 'age_clf': 61, 'ageg':3, 'main': 18}
     return num_class_meta[task]
-
-
-def get_optim(model: nn.Module, optim_type_: str, lr: float):
-    if optim_type_ == 'adam':
-        optimizer = optim.Adam(model.parameters(), lr=lr)
-    elif optim_type_ == 'sgd':
-        optimizer = optim.SGD(model.parameters(), lr=lr)
-    return optimizer
     
 

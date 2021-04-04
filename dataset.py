@@ -27,7 +27,7 @@ def get_dataloader(
             dataset, batch_size=batch_size, shuffle=shuffle, drop_last=drop_last
         )
     else:
-        dataset = EvalDataset(data_root, transform)
+        dataset = EvalDataset(root=data_root, transform=transform)
         dataloader = DataLoader(
             dataset, batch_size=batch_size, shuffle=shuffle, drop_last=drop_last
         )
@@ -73,9 +73,9 @@ class CustomImageFolder(DatasetFolder):
 
 
 class EvalDataset(Dataset):
-    def __init__(self, data_root, transform=None):
-        info = load_pickle(Config.Info) # 추론 순서를 맞추기 위해
-        self.img_paths = list(map(lambda x: os.path.join(data_root, x), info))
+    def __init__(self, root, transform=None, info_path: str=Config.Info):
+        info = load_pickle(info_path) # 추론 순서를 맞추기 위해
+        self.img_paths = list(map(lambda x: os.path.join(root, x), info))
         self.transform = transform
 
     def __getitem__(self, index):
