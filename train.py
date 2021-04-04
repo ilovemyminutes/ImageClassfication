@@ -1,21 +1,18 @@
 import argparse
 import os
 import math
-from numpy.lib.function_base import average
 from tqdm import tqdm
 import numpy as np
 from sklearn.metrics import f1_score
-
 import torch
 from torch import nn
 from torch.nn import functional as F
-
 from model import load_model
-from config import Config, Task
+from config import Config, Task, Loss
 from dataset import get_dataloader
 from utils import age2ageg, set_seed, get_timestamp
+from loss import get_criterion
 from optims import get_optim
-
 import wandb
 
 
@@ -23,19 +20,21 @@ def train(
     task: str = Task.AgeC,  # 수행할 태스크(분류-메인 태스크, 마스크 상태, 연령대, 성별, 회귀-나이)
     model_type: str = Config.VanillaEfficientNet,  # 불러올 모델명
     load_state_dict: str = None,  # 학습 이어서 할 경우 저장된 파라미터 경로
-    data_root: str = Config.Train,  # 데이터 경로
+    train_root: str = Config.TrainS,  # 데이터 경로
+    valid_root: str = Config.ValidS,
     transform_type: str = Config.BaseTransform,  # 적용할 transform
     epochs: int = Config.Epochs,
     batch_size: int = Config.BatchSize,
     optim_type: str = Config.Adam,
+    loss_type: str = Loss.CE,
     lr: float = Config.LR,
     save_path: str = Config.ModelPath,
     seed: int = Config.Seed,
 ):
     set_seed(seed)
-    trainloader = get_dataloader(task, "train", data_root, transform_type, batch_size)
+    trainloader = get_dataloader(task, "train", train_root, transform_type, batch_size)
     validloader = get_dataloader(
-        task, "valid", data_root, transform_type, 1024, shuffle=False, drop_last=False
+        task, "valid", valid_root, transform_type, 1024, shuffle=False, drop_last=False
     )
 
     model = load_model(model_type, task, load_state_dict)
@@ -43,10 +42,9 @@ def train(
     model.train()
 
     optimizer = get_optim(model, optim_type_=optim_type, lr=lr)
+    criterion = get_criterion(loss_type=loss_type)
 
     if task != Task.Age:  # classification(main, ageg, mask, gender)
-        criterion = nn.CrossEntropyLoss()
-
         for epoch in range(epochs):
             print(f"Epoch: {epoch}")
 
@@ -126,13 +124,11 @@ def train(
             )
 
             if save_path:
-                name = f"{model_type}_task({task})ep({epoch:0>2d})f1({valid_f1:.4f})loss({valid_loss:.4f})lr({lr})trans({transform_type})optim({optim_type})seed({seed}).pth"
+                name = f"{model_type}_task({task})ep({epoch:0>2d})f1({valid_f1:.4f})loss({valid_loss:.4f})lr({lr})trans({transform_type})optim({optim_type})crit({loss_type})seed({seed}).pth"
                 torch.save(model.state_dict(), os.path.join(save_path, name))
 
     # regression(age)
     else:
-        criterion = nn.MSELoss()
-        # criterion = nn.SmoothL1Loss()
         for epoch in range(epochs):
             print(f"Epoch: {epoch}")
 
@@ -218,7 +214,7 @@ def train(
             )
 
             if save_path:
-                name = f"{model_type}_task({task})ep({epoch:0>2d})f1({valid_f1:.4f})loss({valid_mse:.4f})lr({lr})trans({transform_type})optim({optim_type})seed({seed}).pth"
+                name = f"{model_type}_task({task})ep({epoch:0>2d})f1({valid_f1:.4f})loss({valid_mse:.4f})lr({lr})trans({transform_type})optim({optim_type})crit({loss_type})seed({seed}).pth"
                 torch.save(model.state_dict(), os.path.join(save_path, name))
 
 
@@ -307,14 +303,16 @@ def validate(task, model, validloader, criterion):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument( "--task", type=str, default=Task.AgeC, help=f"choose task among 'main', 'age', 'ageg', 'gender', 'mask', 'all' (default: {Task.Main})")
+    parser.add_argument( "--task", type=str, default=Task.Main, help=f"choose task among 'main', 'age', 'ageg', 'gender', 'mask', 'all' (default: {Task.Main})")
     parser.add_argument( "--model-type", type=str, default=Config.VanillaEfficientNet, help=f"model type for train (default: {Config.VanillaEfficientNet})")
     parser.add_argument( "--load-state-dict", type=str, default=None, help=f"(optional) state dict path for continuous train (default: None)")
-    parser.add_argument( "--data-root", type=str, default=Config.Train, help=f"data directory for train (default: {Config.Train})")
+    parser.add_argument( "--train-root", type=str, default=Config.TrainS, help=f"data directory for train (default: {Config.TrainS})")
+    parser.add_argument( "--valid-root", type=str, default=Config.ValidS, help=f"data directory for train (default: {Config.ValidS})")
     parser.add_argument( "--transform-type", type=str, default=Config.BaseTransform, help=f"transform type for train (default: {Config.BaseTransform})")
     parser.add_argument("--epochs",type=int,default=Config.Epochs,help=f"number of epochs to train (default: {Config.Epochs})")
     parser.add_argument("--batch-size",type=int,default=Config.BatchSize,metavar="N",help=f"input batch size for training (default: {Config.BatchSize})")
     parser.add_argument("--optim-type",type=str,default=Config.Adam,help=f"optimizer type (default: {Config.Adam})")
+    parser.add_argument("--loss-type",type=str,default=Loss.FL,help=f"optimizer type (default: {Loss.CE})")
     parser.add_argument("--lr",type=float,default=Config.LR,help=f"learning rate (default: {Config.LR})")
     parser.add_argument("--seed",type=int,default=Config.Seed,help=f"random seed (default: {Config.Seed})")
     parser.add_argument("--save-path",type=str,default=Config.ModelPath,help=f"random seed (default: {Config.ModelPath})")

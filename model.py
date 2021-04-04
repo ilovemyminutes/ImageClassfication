@@ -3,10 +3,11 @@ import torch
 from torch import nn
 from torchvision import models
 from efficientnet_pytorch import EfficientNet
-from config import Config
+from config import Config, get_class_num
 
 
-def load_model(model_type: str, n_class: int, load_state_dict: str, freeze: bool=False):
+def load_model(model_type: str, task: int, load_state_dict: str, freeze: bool=False):
+    n_class = get_class_num(task)
     if model_type == "VanillaResNet":
         model = VanillaResNet(n_class, freeze)
     elif model_type == 'VanillaEfficientNet':

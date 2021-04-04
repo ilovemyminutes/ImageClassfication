@@ -8,7 +8,7 @@ from dataset import get_dataloader
 from model import load_model
 from config import Config, Task, get_class_num
 
-LOAD_STATE_DICT = "./saved_models/VanillaEfficientNet_task(main)ep(06)f1(0.7553)loss(0.0004)lr(0.005)trans(base)optim(adam)seed(42).pth"
+LOAD_STATE_DICT = "./saved_models/VanillaEfficientNet_task(main)ep(03)f1(0.7395)loss(0.0000)lr(0.005)trans(base)optim(adam)crit(focalloss)seed(42).pth"
 
     
 def predict(
