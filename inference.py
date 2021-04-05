@@ -8,7 +8,7 @@ from dataset import get_dataloader
 from model import load_model
 from config import Config, Task, get_class_num
 
-LOAD_STATE_DICT = "./saved_models/VanillaEfficientNet_task(main)ep(03)f1(0.7395)loss(0.0000)lr(0.005)trans(base)optim(adam)crit(focalloss)seed(42).pth"
+LOAD_STATE_DICT = "./saved_models/VanillaResNet_task(main)ep(13)f1(0.7185)loss(0.0000)lr(0.005)trans(base)optim(momentum)crit(focalloss)seed(42).pth"
 
     
 def predict(
@@ -62,7 +62,7 @@ def predict(
 
 def predict_submission(
     task: str = Task.Main, 
-    model_type: str = Config.VanillaEfficientNet,
+    model_type: str = Config.VanillaResNet,
     load_state_dict: str = LOAD_STATE_DICT,
     transform_type: str = Config.BaseTransform,
     data_root: str = Config.Eval,
@@ -76,7 +76,7 @@ def predict_submission(
         phase="eval",
         data_root=data_root,
         transform_type=transform_type,
-        batch_size=1,
+        batch_size=1024,
         shuffle=False,
         drop_last=False
     )
@@ -84,12 +84,13 @@ def predict_submission(
     with torch.no_grad():
         id_list = []
         pred_list = []
-        for img_id, img in tqdm(dataloader, desc="Inference"):
-            img = img.cuda()
-            output = model(img)
-            _, pred = torch.max(output, 1)
-            id_list.append(img_id[0])
-            pred_list.append(pred.item())
+
+        for img_ids, imgs in tqdm(dataloader, desc="Inference"):
+            imgs = imgs.cuda()
+            output = model(imgs)
+            _, preds = torch.max(output, 1)
+            id_list.extend(img_ids)
+            pred_list.extend(preds.data.cpu().numpy().flatten())
 
     prediction = pd.DataFrame(dict(ImageID=id_list, ans=pred_list))
     if save_path:
@@ -102,4 +103,4 @@ def predict_submission(
 
 
 if __name__ == "__main__":
-    fire.Fire({"eval": predict_submission, "pred": predict})
+    fire.Fire({"submit": predict_submission, "pred": predict})

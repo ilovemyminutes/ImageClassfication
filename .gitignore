@@ -10,6 +10,8 @@ preprocessed/*
 prediction/*/*
 preprocessed_stratified/*/*
 preprocessed_stratified/*
+preprocessed_pairing/*/*
+preprocessed_pairing/*
 
 # Model Params
 saved_models/*.pth

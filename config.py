@@ -13,10 +13,11 @@ class Config:
     Eval: str = "./input/data/eval/images"
 
     BatchSize: int = 64
-    LR: float = 5e-3
+    LR: float = 1e-2
     Adam: str = 'adam'
     SGD: str = 'sgd'
-    Epochs: int = 10
+    Momentum: str = 'momentum'
+    Epochs: int = 40
     Seed: int = 42
 
     BaseTransform: str = "base"

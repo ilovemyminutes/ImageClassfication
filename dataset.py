@@ -1,5 +1,6 @@
 import os
 from glob import glob
+import numpy as np
 from PIL import Image
 from torch.utils.data import DataLoader, Dataset
 from torchvision.datasets import DatasetFolder

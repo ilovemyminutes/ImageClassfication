@@ -1,4 +1,5 @@
 import argparse
+from inference import LOAD_STATE_DICT
 import os
 import math
 from tqdm import tqdm
@@ -16,10 +17,12 @@ from optims import get_optim
 import wandb
 
 
+
+
 def train(
     task: str = Task.AgeC,  # 수행할 태스크(분류-메인 태스크, 마스크 상태, 연령대, 성별, 회귀-나이)
     model_type: str = Config.VanillaEfficientNet,  # 불러올 모델명
-    load_state_dict: str = None,  # 학습 이어서 할 경우 저장된 파라미터 경로
+    load_state_dict: str = LOAD_STATE_DICT,  # 학습 이어서 할 경우 저장된 파라미터 경로
     train_root: str = Config.TrainS,  # 데이터 경로
     valid_root: str = Config.ValidS,
     transform_type: str = Config.BaseTransform,  # 적용할 transform
@@ -41,7 +44,7 @@ def train(
     model.cuda()
     model.train()
 
-    optimizer = get_optim(model, optim_type_=optim_type, lr=lr)
+    optimizer = get_optim(model, optim_type=optim_type, lr=lr)
     criterion = get_criterion(loss_type=loss_type)
 
     if task != Task.Age:  # classification(main, ageg, mask, gender)
@@ -302,20 +305,23 @@ def validate(task, model, validloader, criterion):
 
 
 if __name__ == "__main__":
+    # LOAD_STATE_DICT = "./saved_models/VanillaResNet_task(main)ep(19)f1(0.7124)loss(0.0000)lr(0.0025)trans(base)optim(momentum)crit(focalloss)seed(42).pth"
+    LOAD_STATE_DICT = None
+
     parser = argparse.ArgumentParser()
-    parser.add_argument( "--task", type=str, default=Task.Main, help=f"choose task among 'main', 'age', 'ageg', 'gender', 'mask', 'all' (default: {Task.Main})")
-    parser.add_argument( "--model-type", type=str, default=Config.VanillaEfficientNet, help=f"model type for train (default: {Config.VanillaEfficientNet})")
-    parser.add_argument( "--load-state-dict", type=str, default=None, help=f"(optional) state dict path for continuous train (default: None)")
-    parser.add_argument( "--train-root", type=str, default=Config.TrainS, help=f"data directory for train (default: {Config.TrainS})")
-    parser.add_argument( "--valid-root", type=str, default=Config.ValidS, help=f"data directory for train (default: {Config.ValidS})")
-    parser.add_argument( "--transform-type", type=str, default=Config.BaseTransform, help=f"transform type for train (default: {Config.BaseTransform})")
-    parser.add_argument("--epochs",type=int,default=Config.Epochs,help=f"number of epochs to train (default: {Config.Epochs})")
-    parser.add_argument("--batch-size",type=int,default=Config.BatchSize,metavar="N",help=f"input batch size for training (default: {Config.BatchSize})")
-    parser.add_argument("--optim-type",type=str,default=Config.Adam,help=f"optimizer type (default: {Config.Adam})")
-    parser.add_argument("--loss-type",type=str,default=Loss.FL,help=f"optimizer type (default: {Loss.CE})")
-    parser.add_argument("--lr",type=float,default=Config.LR,help=f"learning rate (default: {Config.LR})")
-    parser.add_argument("--seed",type=int,default=Config.Seed,help=f"random seed (default: {Config.Seed})")
-    parser.add_argument("--save-path",type=str,default=Config.ModelPath,help=f"random seed (default: {Config.ModelPath})")
+    parser.add_argument( "--task", type=str, default=Task.Ageg)
+    parser.add_argument( "--model-type", type=str, default=Config.VanillaResNet)
+    parser.add_argument( "--load-state-dict", type=str, default=LOAD_STATE_DICT)
+    parser.add_argument( "--train-root", type=str, default=Config.TrainS)
+    parser.add_argument( "--valid-root", type=str, default=Config.ValidS)
+    parser.add_argument( "--transform-type", type=str, default=Config.BaseTransform)
+    parser.add_argument("--epochs",type=int,default=Config.Epochs)
+    parser.add_argument("--batch-size",type=int,default=Config.BatchSize)
+    parser.add_argument("--optim-type",type=str,default=Config.Momentum)
+    parser.add_argument("--loss-type",type=str,default=Loss.FL)
+    parser.add_argument("--lr",type=float,default=Config.LR)
+    parser.add_argument("--seed",type=int,default=Config.Seed)
+    parser.add_argument("--save-path",type=str,default=Config.ModelPath)
 
     args = parser.parse_args()
     name = args.model_type + '_' + args.task + '_' + get_timestamp()
