@@ -85,13 +85,13 @@ def train(
                 train_f1 = f1_score(y_true=true_arr, y_pred=pred_arr, average="macro")
 
                 # logs during one epoch
-                wandb.log(
-                    {
-                        f"Ep{epoch:0>2d} Train F1": train_f1,
-                        f"Ep{epoch:0>2d} Train ACC": train_acc,
-                        f"Ep{epoch:0>2d} Train Loss": train_loss,
-                    }
-                )
+                # wandb.log(
+                #     {
+                #         f"Ep{epoch:0>2d} Train F1": train_f1,
+                #         f"Ep{epoch:0>2d} Train ACC": train_acc,
+                #         f"Ep{epoch:0>2d} Train Loss": train_loss,
+                #     }
+                # )
 
                 if idx != 0 and idx % 100 == 0:
                     valid_f1, valid_acc, valid_loss = validate(
@@ -106,13 +106,13 @@ def train(
                     )
 
                     # logs during one epoch
-                    wandb.log(
-                        {
-                            f"Ep{epoch:0>2d} Valid F1": valid_f1,
-                            f"Ep{epoch:0>2d} Valid ACC": valid_acc,
-                            f"Ep{epoch:0>2d} Valid Loss": valid_loss,
-                        }
-                    )
+                    # wandb.log(
+                    #     {
+                    #         f"Ep{epoch:0>2d} Valid F1": valid_f1,
+                    #         f"Ep{epoch:0>2d} Valid ACC": valid_acc,
+                    #         f"Ep{epoch:0>2d} Valid Loss": valid_loss,
+                    #     }
+                    # )
 
             # logs for one epoch in total
             wandb.log(
@@ -176,14 +176,14 @@ def train(
                 train_f1 = f1_score(y_true=true_arr, y_pred=pred_arr, average="macro")
 
                 # logs during one epoch
-                wandb.log(
-                    {
-                        f"Ep{epoch:0>2d} Train F1": train_f1,
-                        f"Ep{epoch:0>2d} Train ACC": train_acc,
-                        f"Ep{epoch:0>2d} Train RMSE": train_rmse,
-                        f"Ep{epoch:0>2d} Train MSE": train_mse,
-                    }
-                )
+                # wandb.log(
+                #     {
+                #         f"Ep{epoch:0>2d} Train F1": train_f1,
+                #         f"Ep{epoch:0>2d} Train ACC": train_acc,
+                #         f"Ep{epoch:0>2d} Train RMSE": train_rmse,
+                #         f"Ep{epoch:0>2d} Train MSE": train_mse,
+                #     }
+                # )
 
                 if idx != 0 and idx % 100 == 0:
                     valid_f1, valid_acc, valid_rmse, valid_mse = validate(
@@ -195,14 +195,14 @@ def train(
                     print(
                         f"[Train] F1: {train_f1:.4f} ACC: {train_acc:.4f} RMSE: {train_rmse:.4f} MSE: {train_mse:.4f}"
                     )
-                    wandb.log(
-                        {
-                            "Valid F1": valid_f1,
-                            "Valid ACC": valid_acc,
-                            "Valid RMSE": valid_rmse,
-                            "Valid MSE": valid_mse,
-                        }
-                    )
+                    # wandb.log(
+                    #     {
+                    #         "Valid F1": valid_f1,
+                    #         "Valid ACC": valid_acc,
+                    #         "Valid RMSE": valid_rmse,
+                    #         "Valid MSE": valid_mse,
+                    #     }
+                    # )
             wandb.log(
                 {
                     "Train F1": train_f1,
@@ -309,7 +309,7 @@ if __name__ == "__main__":
     LOAD_STATE_DICT = None
 
     parser = argparse.ArgumentParser()
-    parser.add_argument( "--task", type=str, default=Task.Ageg)
+    parser.add_argument( "--task", type=str, default=Task.Main)
     parser.add_argument( "--model-type", type=str, default=Config.VanillaEfficientNet)
     parser.add_argument( "--load-state-dict", type=str, default=LOAD_STATE_DICT)
     parser.add_argument( "--train-root", type=str, default=Config.TrainS)
@@ -318,7 +318,7 @@ if __name__ == "__main__":
     parser.add_argument("--epochs",type=int,default=Config.Epochs)
     parser.add_argument("--batch-size",type=int,default=Config.BatchSize)
     parser.add_argument("--optim-type",type=str,default=Config.Adam)
-    parser.add_argument("--loss-type",type=str,default=Loss.FL)
+    parser.add_argument("--loss-type",type=str,default=Loss.CE)
     parser.add_argument("--lr",type=float,default=Config.LR)
     parser.add_argument("--seed",type=int,default=Config.Seed)
     parser.add_argument("--save-path",type=str,default=Config.ModelPath)
