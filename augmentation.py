@@ -58,6 +58,16 @@ def configure_transform(phase: str, transform_type: str):
 
 
 def crop(img, scale: int=64, p=0.5, rescaled=True):
+    """
+    Description of crop
+
+    Args:
+        img (undefined):
+        scale (int=64):
+        p=0.5 (undefined):
+        rescaled=True (undefined):
+
+    """
     if np.random.uniform(0, 1) >= p: # 시행하지 않을 경우
         return img
         

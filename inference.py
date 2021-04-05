@@ -6,7 +6,7 @@ from torch.nn import functional as F
 import fire
 from dataset import get_dataloader
 from model import load_model
-from config import Config, Task, get_class_num
+from config import Config, Task, get_class_num, Aug
 
 LOAD_STATE_DICT = "./saved_models/VanillaResNet_task(main)ep(13)f1(0.7185)loss(0.0000)lr(0.005)trans(base)optim(momentum)crit(focalloss)seed(42).pth"
 
@@ -15,7 +15,7 @@ def predict(
     task: str=Task.Age,
     model_type: str = Config.VanillaEfficientNet,
     load_state_dict: str = None,
-    transform_type: str = Config.BaseTransform,
+    transform_type: str = Aug.BaseTransform,
     data_root: str = Config.Test,
     save_path: str = Config.Inference,
 ):
@@ -64,7 +64,7 @@ def predict_submission(
     task: str = Task.Main, 
     model_type: str = Config.VanillaResNet,
     load_state_dict: str = LOAD_STATE_DICT,
-    transform_type: str = Config.BaseTransform,
+    transform_type: str = Aug.BaseTransform,
     data_root: str = Config.Eval,
     save_path: str = Config.Inference,
 ):

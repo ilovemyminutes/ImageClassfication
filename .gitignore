@@ -12,6 +12,7 @@ preprocessed_stratified/*/*
 preprocessed_stratified/*
 preprocessed_pairing/*/*
 preprocessed_pairing/*
+external/*/*/*
 
 # Model Params
 saved_models/*.pth

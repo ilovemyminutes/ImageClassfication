@@ -111,7 +111,7 @@ class VanillaEfficientNet(nn.Module):
 class VanillaResNet(nn.Module):
     def __init__(self, n_class: int, freeze: bool = False):
         super(VanillaResNet, self).__init__()
-        self.resnet = models.resnet101(pretrained=True)
+        self.resnet = models.resnet50(pretrained=True)
         if freeze:
             self._freeze()
         self.resnet.fc = nn.Linear(in_features=2048, out_features=n_class)

@@ -13,11 +13,11 @@ class Config:
     Eval: str = "./input/data/eval/images"
 
     BatchSize: int = 64
-    LR: float = 1e-2
+    LR: float = 5e-3
     Adam: str = 'adam'
     SGD: str = 'sgd'
     Momentum: str = 'momentum'
-    Epochs: int = 40
+    Epochs: int = 15
     Seed: int = 42
 
     VanillaResNet: str = "VanillaResNet"

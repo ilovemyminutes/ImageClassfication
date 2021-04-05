@@ -7,14 +7,14 @@ from torchvision.datasets import DatasetFolder
 from torchvision.datasets.folder import default_loader, IMG_EXTENSIONS
 from augmentation import configure_transform
 from utils import load_pickle, load_json
-from config import Config, Task
+from config import Config, Task, Aug
 
 
 def get_dataloader(
     task: str=Task.Main, # class, gender, ageg, age
     phase: str='train',
     data_root: str=Config.Train,
-    transform_type: str=Config.BaseTransform,
+    transform_type: str=Aug.BaseTransform,
     batch_size: int = Config.BatchSize,
     shuffle: bool = True,
     drop_last: bool = True,
