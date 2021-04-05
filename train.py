@@ -9,7 +9,7 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 from model import load_model
-from config import Config, Task, Loss
+from config import Config, Task, Loss, Aug
 from dataset import get_dataloader
 from utils import age2ageg, set_seed, get_timestamp
 from loss import get_criterion
@@ -25,7 +25,7 @@ def train(
     load_state_dict: str = LOAD_STATE_DICT,  # 학습 이어서 할 경우 저장된 파라미터 경로
     train_root: str = Config.TrainS,  # 데이터 경로
     valid_root: str = Config.ValidS,
-    transform_type: str = Config.BaseTransform,  # 적용할 transform
+    transform_type: str = Aug.BaseTransform,  # 적용할 transform
     epochs: int = Config.Epochs,
     batch_size: int = Config.BatchSize,
     optim_type: str = Config.Adam,
@@ -314,7 +314,7 @@ if __name__ == "__main__":
     parser.add_argument( "--load-state-dict", type=str, default=LOAD_STATE_DICT)
     parser.add_argument( "--train-root", type=str, default=Config.TrainS)
     parser.add_argument( "--valid-root", type=str, default=Config.ValidS)
-    parser.add_argument( "--transform-type", type=str, default=Config.BaseTransform)
+    parser.add_argument( "--transform-type", type=str, default=Aug.BaseTransform)
     parser.add_argument("--epochs",type=int,default=Config.Epochs)
     parser.add_argument("--batch-size",type=int,default=Config.BatchSize)
     parser.add_argument("--optim-type",type=str,default=Config.Momentum)

@@ -20,9 +20,6 @@ class Config:
     Epochs: int = 40
     Seed: int = 42
 
-    BaseTransform: str = "base"
-    FixTransform: str = "fix"
-
     VanillaResNet: str = "VanillaResNet"
     VanillaEfficientNet: str = "VanillaEfficientNet"
     THANet_MK1: str = 'THANet_MK1' # wrong structure yet
@@ -33,6 +30,11 @@ class Config:
     Metadata: str = './preprocessed/metadata.json'
     Info: str = './preprocessed/info.pkl'
 
+@dataclass
+class Aug:
+    BaseTransform: str = "base"
+    FaceCrop: str = 'facecrop'
+    FixTransform: str = "fix"
 
 class Task:
     Mask: str='mask'

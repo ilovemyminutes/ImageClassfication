@@ -5,7 +5,7 @@ from PIL import Image
 from torch.utils.data import DataLoader, Dataset
 from torchvision.datasets import DatasetFolder
 from torchvision.datasets.folder import default_loader, IMG_EXTENSIONS
-from transform_settings import configure_transform
+from augmentation import configure_transform
 from utils import load_pickle, load_json
 from config import Config, Task
 
