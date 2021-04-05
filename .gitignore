@@ -8,7 +8,10 @@ input/data/*
 preprocessed/*/*
 preprocessed/*
 prediction/*/*
-preprocessed_deprecated/*/*
+preprocessed_stratified/*/*
+preprocessed_stratified/*
+preprocessed_pairing/*/*
+preprocessed_pairing/*
 
 # Model Params
 saved_models/*.pth
