@@ -96,11 +96,17 @@ class VanillaEfficientNet(nn.Module):
         self.efficientnet = EfficientNet.from_pretrained('efficientnet-b3')
         if freeze:
             self._freeze()
+        self.batchnorm = nn.BatchNorm1d(num_features=1000)
+        self.dropout = nn.Dropout()
+        self.relu = nn.ReLU()
         self.linear = nn.Linear(in_features=1000, out_features=n_class)
 
     def forward(self, x):
-        output = self.efficientnet(x)
-        output = self.linear(output)
+        x = self.efficientnet(x)
+        x = self.batchnorm(x)
+        x = self.dropout(x)
+        x = self.relu(x)
+        output = self.linear(x)
         return output
 
     def _freeze(self):
