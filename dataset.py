@@ -21,7 +21,7 @@ def get_dataloader(
 ):
     transform = configure_transform(phase, transform_type)
 
-    if phase in ["train", "valid", "test"]:
+    if phase in ["train", "valid"]:
         meta_path = Config.Metadata # if os.path.isfile(Config.Metadata) else '../preprocessed/metadata.json'
         dataset = TrainDataset(root=data_root, transform=transform, task=task, meta_path=meta_path)
         dataloader = DataLoader(

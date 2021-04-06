@@ -7,8 +7,7 @@ class Config:
     Valid: str = "./preprocessed/valid"
     Test: str = "./preprocessed/test"
     TrainS: str = "./preprocessed_stratified/train"
-    ValidS: str = "./preprocessed_stratified/valid"
-    TestS: str = "./preprocessed_stratified/test"
+    ValidS: str = "./preprocessed_stratified/test"
 
     Eval: str = "./input/data/eval/images"
 
@@ -16,6 +15,7 @@ class Config:
     LR: float = 5e-3
     CosineScheduler: str = 'cosine'
     Adam: str = 'adam'
+    AdamP: str = 'adamp'
     SGD: str = 'sgd'
     Momentum: str = 'momentum'
     Epochs: int = 30
@@ -23,6 +23,9 @@ class Config:
 
     VanillaResNet: str = "VanillaResNet"
     VanillaEfficientNet: str = "VanillaEfficientNet"
+    MultiClassTHANet: str = 'MultiClassTHANet'
+    MultiClassTHANet_MK1: str = 'MultiClassTHANet_MK1'
+    MultiLabelTHANet: str = 'MultiLabelTHANet'
     THANet_MK1: str = 'THANet_MK1' # wrong structure yet
     THANet_MK2: str = 'THANet_MK2' # wrong structure yet
     ModelPath: str = "./saved_models"
@@ -37,6 +40,7 @@ class Aug:
     FaceCrop: str = 'facecrop'
     FixTransform: str = "fix"
 
+@dataclass
 class Task:
     Mask: str='mask'
     Gender: str='gender'
@@ -46,6 +50,7 @@ class Task:
     Main: str='main'
     All: str='all'
 
+@dataclass
 class Loss:
     CE: str='crossentropyloss'
     FL: str='focalloss'

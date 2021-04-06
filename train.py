@@ -50,6 +50,8 @@ def train(
     criterion = get_criterion(loss_type=loss_type)
     scheduler = get_scheduler(scheduler_type=lr_scheduler, optimizer=optimizer)
 
+    best_f1 = 0
+
     if task != Task.Age:  # classification(main, ageg, mask, gender)
         for epoch in range(epochs):
             print(f"Epoch: {epoch}")
@@ -88,14 +90,15 @@ def train(
                 train_acc = (true_arr == pred_arr).sum() / len(true_arr)
                 train_f1 = f1_score(y_true=true_arr, y_pred=pred_arr, average="macro")
 
-                # logs during one epoch
-                # wandb.log(
-                #     {
-                #         f"Ep{epoch:0>2d} Train F1": train_f1,
-                #         f"Ep{epoch:0>2d} Train ACC": train_acc,
-                #         f"Ep{epoch:0>2d} Train Loss": train_loss,
-                #     }
-                # )
+                if epoch == 0: # logs during just first epoch
+                    
+                    wandb.log(
+                        {
+                            f"Ep{epoch:0>2d} Train F1": train_f1,
+                            f"Ep{epoch:0>2d} Train ACC": train_acc,
+                            f"Ep{epoch:0>2d} Train Loss": train_loss,
+                        }
+                    )
 
                 if idx != 0 and idx % VALID_CYCLE == 0:
                     valid_f1, valid_acc, valid_loss = validate(
@@ -108,15 +111,15 @@ def train(
                     print(
                         f"[Train] F1: {train_f1:.4f} ACC: {train_acc:.4f} Loss: {train_loss:.4f}"
                     )
-
-                    # logs during one epoch
-                    # wandb.log(
-                    #     {
-                    #         f"Ep{epoch:0>2d} Valid F1": valid_f1,
-                    #         f"Ep{epoch:0>2d} Valid ACC": valid_acc,
-                    #         f"Ep{epoch:0>2d} Valid Loss": valid_loss,
-                    #     }
-                    # )
+                    if epoch == 0:
+                        # logs during one epoch
+                        wandb.log(
+                            {
+                                f"Ep{epoch:0>2d} Valid F1": valid_f1,
+                                f"Ep{epoch:0>2d} Valid ACC": valid_acc,
+                                f"Ep{epoch:0>2d} Valid Loss": valid_loss,
+                            }
+                        )
 
             # logs for one epoch in total
             wandb.log(
@@ -130,8 +133,9 @@ def train(
                 }
             )
 
-            if save_path:
+            if save_path and valid_f1 >= best_f1:
                 name = f"{model_type}_task({task})ep({epoch:0>2d})f1({valid_f1:.4f})loss({valid_loss:.4f})lr({lr})trans({transform_type})optim({optim_type})crit({loss_type})seed({seed}).pth"
+                best_f1 = valid_f1
                 torch.save(model.state_dict(), os.path.join(save_path, name))
 
     # regression(age)
@@ -321,7 +325,7 @@ if __name__ == "__main__":
     parser.add_argument( "--transform-type", type=str, default=Aug.BaseTransform)
     parser.add_argument("--epochs",type=int,default=Config.Epochs)
     parser.add_argument("--batch-size",type=int,default=Config.BatchSize)
-    parser.add_argument("--optim-type",type=str,default=Config.Adam)
+    parser.add_argument("--optim-type",type=str,default=Config.AdamP)
     parser.add_argument("--loss-type",type=str,default=Loss.CE)
     parser.add_argument("--lr",type=float,default=Config.LR)
     parser.add_argument("--lr-scheduler",type=str,default=Config.CosineScheduler)
