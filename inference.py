@@ -8,11 +8,11 @@ from dataset import get_dataloader
 from model import load_model
 from config import Config, Task, get_class_num, Aug
 
-LOAD_STATE_DICT = "./saved_models/VanillaResNet_task(main)ep(13)f1(0.7185)loss(0.0000)lr(0.005)trans(base)optim(momentum)crit(focalloss)seed(42).pth"
+LOAD_STATE_DICT = "./saved_models/VanillaEfficientNet_task(main)ep(22)f1(0.7256)loss(0.0007)lr(0.005)trans(base)optim(adam)crit(crossentropyloss)seed(42).pth"
 
     
 def predict(
-    task: str=Task.Age,
+    task: str=Task.Main,
     model_type: str = Config.VanillaEfficientNet,
     load_state_dict: str = None,
     transform_type: str = Aug.BaseTransform,
@@ -22,8 +22,7 @@ def predict(
     if load_state_dict is None:
         load_state_dict = LOAD_STATE_DICT
 
-    n_classes = get_class_num(task)
-    model = load_model(model_type, n_classes, load_state_dict)
+    model = load_model(model_type, task, load_state_dict)
 
     model.cuda()
     model.eval()
@@ -62,7 +61,7 @@ def predict(
 
 def predict_submission(
     task: str = Task.Main, 
-    model_type: str = Config.VanillaResNet,
+    model_type: str = Config.VanillaEfficientNet,
     load_state_dict: str = LOAD_STATE_DICT,
     transform_type: str = Aug.BaseTransform,
     data_root: str = Config.Eval,

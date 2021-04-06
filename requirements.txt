@@ -1,3 +1,4 @@
+adamp==0.3.0
 black==20.8b1
 fire==0.4.0
 focal-loss-torch==0.0.7

@@ -14,10 +14,11 @@ class Config:
 
     BatchSize: int = 64
     LR: float = 5e-3
+    CosineScheduler: str = 'cosine'
     Adam: str = 'adam'
     SGD: str = 'sgd'
     Momentum: str = 'momentum'
-    Epochs: int = 15
+    Epochs: int = 30
     Seed: int = 42
 
     VanillaResNet: str = "VanillaResNet"
@@ -27,7 +28,7 @@ class Config:
     ModelPath: str = "./saved_models"
 
     Inference: str = "./prediction"
-    Metadata: str = './preprocessed/metadata.json'
+    Metadata: str = './preprocessed_stratified/metadata.json'
     Info: str = './preprocessed/info.pkl'
 
 @dataclass
@@ -50,7 +51,7 @@ class Loss:
     FL: str='focalloss'
     MSE: str='mseloss'
     SML1: str='smoothl1loss'
-
+    
 
 def get_class_num(task):
     num_class_meta = {'mask': 3, 'gender': 2, 'age':1, 'age_clf': 61, 'ageg':3, 'main': 18}

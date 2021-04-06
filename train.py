@@ -13,10 +13,11 @@ from config import Config, Task, Loss, Aug
 from dataset import get_dataloader
 from utils import age2ageg, set_seed, get_timestamp
 from loss import get_criterion
-from optims import get_optim
+from optims import get_optim, get_scheduler
 import wandb
 
 
+VALID_CYCLE = 250
 
 
 def train(
@@ -31,6 +32,7 @@ def train(
     optim_type: str = Config.Adam,
     loss_type: str = Loss.CE,
     lr: float = Config.LR,
+    lr_scheduler: str = Config.CosineScheduler,
     save_path: str = Config.ModelPath,
     seed: int = Config.Seed,
 ):
@@ -46,6 +48,7 @@ def train(
 
     optimizer = get_optim(model, optim_type=optim_type, lr=lr)
     criterion = get_criterion(loss_type=loss_type)
+    scheduler = get_scheduler(scheduler_type=lr_scheduler, optimizer=optimizer)
 
     if task != Task.Age:  # classification(main, ageg, mask, gender)
         for epoch in range(epochs):
@@ -76,6 +79,7 @@ def train(
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
+                scheduler.step()
 
                 train_loss = total_loss / num_samples
 
@@ -93,7 +97,7 @@ def train(
                 #     }
                 # )
 
-                if idx != 0 and idx % 100 == 0:
+                if idx != 0 and idx % VALID_CYCLE == 0:
                     valid_f1, valid_acc, valid_loss = validate(
                         task, model, validloader, criterion
                     )
@@ -158,6 +162,7 @@ def train(
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
+                scheduler.step()
 
                 # classification(ageg)
                 labels_clf = age2ageg(labels.data.numpy())
@@ -185,7 +190,7 @@ def train(
                 #     }
                 # )
 
-                if idx != 0 and idx % 100 == 0:
+                if idx != 0 and idx % VALID_CYCLE == 0:
                     valid_f1, valid_acc, valid_rmse, valid_mse = validate(
                         task, model, validloader, criterion
                     )
@@ -305,7 +310,6 @@ def validate(task, model, validloader, criterion):
 
 
 if __name__ == "__main__":
-    # LOAD_STATE_DICT = "./saved_models/VanillaResNet_task(main)ep(19)f1(0.7124)loss(0.0000)lr(0.0025)trans(base)optim(momentum)crit(focalloss)seed(42).pth"
     LOAD_STATE_DICT = None
 
     parser = argparse.ArgumentParser()
@@ -314,12 +318,13 @@ if __name__ == "__main__":
     parser.add_argument( "--load-state-dict", type=str, default=LOAD_STATE_DICT)
     parser.add_argument( "--train-root", type=str, default=Config.TrainS)
     parser.add_argument( "--valid-root", type=str, default=Config.ValidS)
-    parser.add_argument( "--transform-type", type=str, default=Aug.FaceCrop)
+    parser.add_argument( "--transform-type", type=str, default=Aug.BaseTransform)
     parser.add_argument("--epochs",type=int,default=Config.Epochs)
     parser.add_argument("--batch-size",type=int,default=Config.BatchSize)
     parser.add_argument("--optim-type",type=str,default=Config.Adam)
     parser.add_argument("--loss-type",type=str,default=Loss.CE)
     parser.add_argument("--lr",type=float,default=Config.LR)
+    parser.add_argument("--lr-scheduler",type=str,default=Config.CosineScheduler)
     parser.add_argument("--seed",type=int,default=Config.Seed)
     parser.add_argument("--save-path",type=str,default=Config.ModelPath)
 
