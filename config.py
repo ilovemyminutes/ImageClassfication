@@ -4,8 +4,7 @@ from dataclasses import dataclass
 @dataclass
 class Config:
     Train: str = "./preprocessed/train"
-    Valid: str = "./preprocessed/valid"
-    Test: str = "./preprocessed/test"
+    Valid: str = "./preprocessed/test"
     TrainS: str = "./preprocessed_stratified/train"
     ValidS: str = "./preprocessed_stratified/test"
 
@@ -39,6 +38,7 @@ class Aug:
     BaseTransform: str = "base"
     FaceCrop: str = 'facecrop'
     FixTransform: str = "fix"
+    Random: str = 'random'
 
 @dataclass
 class Task:
@@ -56,6 +56,7 @@ class Loss:
     FL: str='focalloss'
     MSE: str='mseloss'
     SML1: str='smoothl1loss'
+    LS: str='labelsmoothingLoss'
     
 
 def get_class_num(task):

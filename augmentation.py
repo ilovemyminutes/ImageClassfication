@@ -2,6 +2,7 @@ import numpy as np
 from torchvision import transforms
 from PIL import Image
 import cv2
+from RandAugment import RandAugment
 
 
 def configure_transform(phase: str, transform_type: str):
@@ -27,6 +28,16 @@ def configure_transform(phase: str, transform_type: str):
                     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
                 ]
             )
+        elif transform_type == 'random':
+            transform  = transforms.Compose(
+                [
+                    transforms.CenterCrop((384, 384)),
+                    transforms.RandomResizedCrop((224, 224)),
+                    RandAugment(2, 9), # N: 몇 개 선택할지 M: 몇 번 변화시킬 것인지
+                    transforms.ToTensor(),
+                    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+                ]
+            )
 
         else:
             raise NotImplementedError()
@@ -46,6 +57,15 @@ def configure_transform(phase: str, transform_type: str):
                 [
                     transforms.Lambda(lambda x: crop(x)),
                     transforms.Resize((312, 234)),
+                    transforms.CenterCrop((224, 224)),
+                    transforms.ToTensor(),
+                    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+                ]
+            )
+
+        elif transform_type == 'random':
+            transform  = transforms.Compose(
+                [
                     transforms.CenterCrop((224, 224)),
                     transforms.ToTensor(),
                     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),

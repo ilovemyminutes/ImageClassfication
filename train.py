@@ -1,5 +1,4 @@
 import argparse
-from inference import LOAD_STATE_DICT
 import os
 import math
 from tqdm import tqdm
@@ -17,13 +16,13 @@ from optims import get_optim, get_scheduler
 import wandb
 
 
-VALID_CYCLE = 250
+VALID_CYCLE = 200
 
 
 def train(
     task: str = Task.AgeC,  # 수행할 태스크(분류-메인 태스크, 마스크 상태, 연령대, 성별, 회귀-나이)
     model_type: str = Config.VanillaEfficientNet,  # 불러올 모델명
-    load_state_dict: str = LOAD_STATE_DICT,  # 학습 이어서 할 경우 저장된 파라미터 경로
+    load_state_dict: str = None,  # 학습 이어서 할 경우 저장된 파라미터 경로
     train_root: str = Config.TrainS,  # 데이터 경로
     valid_root: str = Config.ValidS,
     transform_type: str = Aug.BaseTransform,  # 적용할 transform
@@ -47,7 +46,7 @@ def train(
     model.train()
 
     optimizer = get_optim(model, optim_type=optim_type, lr=lr)
-    criterion = get_criterion(loss_type=loss_type)
+    criterion = get_criterion(loss_type=loss_type, task=task)
     scheduler = get_scheduler(scheduler_type=lr_scheduler, optimizer=optimizer)
 
     best_f1 = 0
@@ -317,16 +316,16 @@ if __name__ == "__main__":
     LOAD_STATE_DICT = None
 
     parser = argparse.ArgumentParser()
-    parser.add_argument( "--task", type=str, default=Task.Main)
+    parser.add_argument( "--task", type=str, default=Task.Ageg)
     parser.add_argument( "--model-type", type=str, default=Config.VanillaEfficientNet)
     parser.add_argument( "--load-state-dict", type=str, default=LOAD_STATE_DICT)
-    parser.add_argument( "--train-root", type=str, default=Config.TrainS)
-    parser.add_argument( "--valid-root", type=str, default=Config.ValidS)
-    parser.add_argument( "--transform-type", type=str, default=Aug.BaseTransform)
+    parser.add_argument( "--train-root", type=str, default=Config.Train)
+    parser.add_argument( "--valid-root", type=str, default=Config.Valid)
+    parser.add_argument( "--transform-type", type=str, default=Aug.Random)
     parser.add_argument("--epochs",type=int,default=Config.Epochs)
     parser.add_argument("--batch-size",type=int,default=Config.BatchSize)
-    parser.add_argument("--optim-type",type=str,default=Config.AdamP)
-    parser.add_argument("--loss-type",type=str,default=Loss.CE)
+    parser.add_argument("--optim-type",type=str,default=Config.Adam)
+    parser.add_argument("--loss-type",type=str,default=Loss.LS)
     parser.add_argument("--lr",type=float,default=Config.LR)
     parser.add_argument("--lr-scheduler",type=str,default=Config.CosineScheduler)
     parser.add_argument("--seed",type=int,default=Config.Seed)

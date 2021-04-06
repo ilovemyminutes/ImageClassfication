@@ -16,7 +16,7 @@ def predict(
     model_type: str = Config.VanillaEfficientNet,
     load_state_dict: str = None,
     transform_type: str = Aug.BaseTransform,
-    data_root: str = Config.Test,
+    data_root: str = Config.Valid,
     save_path: str = Config.Inference,
 ):
     if load_state_dict is None:
