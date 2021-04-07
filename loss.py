@@ -4,7 +4,7 @@ from torch.nn import functional as F
 from config import Loss, get_class_num
 
 
-def get_criterion(loss_type: str=Loss.CE, task: str=None):
+def get_criterion(loss_type: str = Loss.CE, task: str = None):
     if loss_type == Loss.CE:
         criterion = nn.CrossEntropyLoss()
     elif loss_type == Loss.FL:
@@ -19,16 +19,17 @@ def get_criterion(loss_type: str=Loss.CE, task: str=None):
     return criterion
 
 
-
 class FocalLoss(nn.modules.loss._WeightedLoss):
-    def __init__(self, weight=None, gamma=2, reduction='mean'):
+    def __init__(self, weight=None, gamma=2, reduction="mean"):
         super(FocalLoss, self).__init__(weight, reduction=reduction)
         self.gamma = gamma
-        self.weight = weight #weight parameter will act as the alpha parameter to balance class weights
+        self.weight = weight  # weight parameter will act as the alpha parameter to balance class weights
 
     def forward(self, input, target):
 
-        ce_loss = F.cross_entropy(input, target, reduction=self.reduction, weight=self.weight)
+        ce_loss = F.cross_entropy(
+            input, target, reduction=self.reduction, weight=self.weight
+        )
         pt = torch.exp(-ce_loss)
         focal_loss = ((1 - pt) ** self.gamma * ce_loss).mean()
         return focal_loss
@@ -44,7 +45,7 @@ class LabelSmoothingLoss(nn.Module):
 
     def forward(self, pred, target):
         pred = pred.log_softmax(dim=self.dim)
-        
+
         with torch.no_grad():
             true_dist = torch.zeros_like(pred)
             true_dist.fill_(self.smoothing / (self.cls - 1))

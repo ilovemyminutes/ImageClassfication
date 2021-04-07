@@ -94,8 +94,8 @@ def train(
                 train_acc = (true_arr == pred_arr).sum() / len(true_arr)
                 train_f1 = f1_score(y_true=true_arr, y_pred=pred_arr, average="macro")
 
-                if epoch == 0: # logs during just first epoch
-                    
+                if epoch == 0:  # logs during just first epoch
+
                     wandb.log(
                         {
                             f"Ep{epoch:0>2d} Train F1": train_f1,
@@ -234,7 +234,6 @@ def train(
                 torch.save(model.state_dict(), os.path.join(save_path, name))
 
 
-
 def train_cv(
     task: str = Task.AgeC,  # 수행할 태스크(분류-메인 태스크, 마스크 상태, 연령대, 성별, 회귀-나이)
     model_type: str = Config.VanillaEfficientNet,  # 불러올 모델명
@@ -253,23 +252,27 @@ def train_cv(
     seed: int = Config.Seed,
 ):
     if save_path:
-        kfold_dir = f'kfold_{model_type}_' + get_timestamp()
+        kfold_dir = f"kfold_{model_type}_" + get_timestamp()
         if kfold_dir not in os.listdir(save_path):
             os.mkdir(os.path.join(save_path, kfold_dir))
 
     set_seed(seed)
-    transform = configure_transform(phase='train', transform_type=transform_type)
+    transform = configure_transform(phase="train", transform_type=transform_type)
     trainset = TrainDataset(root=train_root, transform=transform, batch_size=batch_size)
     validloader = get_dataloader(
         task, "valid", valid_root, transform_type, 1024, shuffle=False, drop_last=False
     )
-    
+
     kfold = KFold(n_splits=cv, shuffle=True)
-    
-    for fold_idx, (train_indices, _) in enumerate(kfold.split(trainset)): # 앙상블이 목적이므로 test 인덱스는 따로 사용하지 않고, validloader를 통해 성능 검증
-        print(f'Train Fold #{fold_idx}')
+
+    for fold_idx, (train_indices, _) in enumerate(
+        kfold.split(trainset)
+    ):  # 앙상블이 목적이므로 test 인덱스는 따로 사용하지 않고, validloader를 통해 성능 검증
+        print(f"Train Fold #{fold_idx}")
         train_sampler = SubsetRandomSampler(train_indices)
-        trainloader = DataLoader(trainset, batch_size=batch_size, sampler=train_sampler, drop_last=True)
+        trainloader = DataLoader(
+            trainset, batch_size=batch_size, sampler=train_sampler, drop_last=True
+        )
 
         model = load_model(model_type, task, load_state_dict)
         model.cuda()
@@ -320,10 +323,12 @@ def train_cv(
                     pred_arr = np.hstack(pred_list)
                     true_arr = np.hstack(true_list)
                     train_acc = (true_arr == pred_arr).sum() / len(true_arr)
-                    train_f1 = f1_score(y_true=true_arr, y_pred=pred_arr, average="macro")
+                    train_f1 = f1_score(
+                        y_true=true_arr, y_pred=pred_arr, average="macro"
+                    )
 
-                    if epoch == 0: # logs during just first epoch
-                        
+                    if epoch == 0:  # logs during just first epoch
+
                         wandb.log(
                             {
                                 f"Fold #{fold_idx} Ep{epoch:0>2d} Train F1": train_f1,
@@ -368,7 +373,9 @@ def train_cv(
                 if save_path and valid_f1 >= best_f1:
                     name = f"Fold{fold_idx:0>2d}_{model_type}_task({task})ep({epoch:0>2d})f1({valid_f1:.4f})bs({batch_size})loss({valid_loss:.4f})lr({lr})trans({transform_type})optim({optim_type})crit({loss_type})seed({seed}).pth"
                     best_f1 = valid_f1
-                    torch.save(model.state_dict(), os.path.join(save_path, kfold_dir, name))
+                    torch.save(
+                        model.state_dict(), os.path.join(save_path, kfold_dir, name)
+                    )
 
         # regression(age)
         else:
@@ -414,7 +421,9 @@ def train_cv(
                     true_arr = np.hstack(true_list)
 
                     train_acc = (true_arr == pred_arr).sum() / len(true_arr)
-                    train_f1 = f1_score(y_true=true_arr, y_pred=pred_arr, average="macro")
+                    train_f1 = f1_score(
+                        y_true=true_arr, y_pred=pred_arr, average="macro"
+                    )
 
                     if idx != 0 and idx % VALID_CYCLE == 0:
                         valid_f1, valid_acc, valid_rmse, valid_mse = validate(
@@ -442,7 +451,9 @@ def train_cv(
 
                 if save_path:
                     name = f"Fold{fold_idx:0>2d}_{model_type}_task({task})ep({epoch:0>2d})f1({valid_f1:.4f})bs({batch_size})loss({valid_mse:.4f})lr({lr})trans({transform_type})optim({optim_type})crit({loss_type})seed({seed}).pth"
-                    torch.save(model.state_dict(), os.path.join(save_path, kfold_dir, name))
+                    torch.save(
+                        model.state_dict(), os.path.join(save_path, kfold_dir, name)
+                    )
 
 
 def validate(task, model, validloader, criterion):
@@ -532,15 +543,15 @@ if __name__ == "__main__":
     LOAD_STATE_DICT = None
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--task", type=str, default=Task.Main)       
+    parser.add_argument("--task", type=str, default=Task.Main)
     parser.add_argument("--model-type", type=str, default=Config.VanillaResNet)
     parser.add_argument("--load-state-dict", type=str, default=LOAD_STATE_DICT)
     parser.add_argument("--train-root", type=str, default=Config.Train)
     parser.add_argument("--valid-root", type=str, default=Config.Valid)
     parser.add_argument("--transform-type", type=str, default=Aug.Random)
-    parser.add_argument("--epochs",type=int, default=Config.Epochs)
+    parser.add_argument("--epochs", type=int, default=Config.Epochs)
     parser.add_argument("--cv", type=int, default=None)
-    parser.add_argument("--batch-size",type=int, default=Config.Batch32)
+    parser.add_argument("--batch-size", type=int, default=Config.Batch32)
     parser.add_argument("--optim-type", type=str, default=Config.Adam)
     parser.add_argument("--loss-type", type=str, default=Loss.LS)
     parser.add_argument("--lr", type=float, default=Config.LRSlower)
@@ -549,16 +560,18 @@ if __name__ == "__main__":
     parser.add_argument("--save-path", type=str, default=Config.ModelPath)
 
     args = parser.parse_args()
-    name = args.model_type + '_' + args.task + '_' + get_timestamp()
+    name = args.model_type + "_" + args.task + "_" + get_timestamp()
     run = wandb.init(project="pstage-imageclf", name=name, reinit=True)
-    
+
     wandb.config.update(args)  # adds all of the arguments as config variables
     print("=" * 100)
     print(args)
     print("=" * 100)
 
     if args.cv is not None:
-        print('Welcome to K Cross Validation Train! If you check it works, then you can go to sleep😴')
+        print(
+            "Welcome to K Cross Validation Train! If you check it works, then you can go to sleep😴"
+        )
         train_cv(**vars(args))
     else:
         train(**vars(args))

@@ -5,14 +5,16 @@ import numpy as np
 import torch
 import datetime
 
+
 @np.vectorize
 def age2ageg(age):
     if age < 30:
-        return 0 # young
+        return 0  # young
     elif age >= 30 and age < 60:
-        return 1 # middle
+        return 1  # middle
     else:
-        return 2 # old
+        return 2  # old
+
 
 def get_timestamp():
     KST = datetime.timezone(datetime.timedelta(hours=9))
@@ -20,14 +22,17 @@ def get_timestamp():
     now2str = now.strftime("%Y%m%d%H%M%S")
     return now2str
 
+
 def save_pickle(path: str, f: object) -> None:
     with open(path, "wb") as handle:
         pickle.dump(f, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
 
 def load_pickle(path: str):
     with open(path, "rb") as pkl_file:
         output = pickle.load(pkl_file)
     return output
+
 
 def save_json(path: str, f: object) -> None:
     with open(path, "w") as json_path:
@@ -35,6 +40,7 @@ def save_json(path: str, f: object) -> None:
             f,
             json_path,
         )
+
 
 def load_json(path: str) -> dict:
     with open(path, "r") as json_file:

@@ -8,37 +8,44 @@ from torch.nn import functional as F
 from config import Config, get_class_num
 
 
-def load_model(model_type: str, task: str, load_state_dict: str, freeze: bool=False):
+def load_model(model_type: str, task: str, load_state_dict: str, freeze: bool = False):
     n_class = get_class_num(task)
     if model_type == "VanillaResNet":
         model = VanillaResNet(n_class, freeze)
-    elif model_type == 'VanillaEfficientNet':
+    elif model_type == "VanillaEfficientNet":
         model = VanillaEfficientNet(n_class, freeze)
-    elif model_type == 'THANet_MK1':
+    elif model_type == "THANet_MK1":
         model = THANet_MK1(freeze)
-    elif model_type == 'THANet_MK2':
+    elif model_type == "THANet_MK2":
         model = THANet_MK2(freeze)
-    elif model_type == 'MultiClassTHANet_MK1':
+    elif model_type == "MultiClassTHANet_MK1":
         model = MultiClassTHANet_MK1()
     else:
         raise NotImplementedError()
     if load_state_dict:
         model.load_state_dict(torch.load(load_state_dict))
-        print(f'Loaded pretrained weights from {load_state_dict}')
+        print(f"Loaded pretrained weights from {load_state_dict}")
     return model
 
 
 class MultiClassTHANet_MK1(nn.Module):
-    TASK = {'mask': 3, 'ageg': 3, 'gender': 2, 'all': 8, 'main': 18} # all: 8 = 3 + 3 + 2
-    def __init__(self, d_model: int=64, num_heads: int=8):
+    TASK = {
+        "mask": 3,
+        "ageg": 3,
+        "gender": 2,
+        "all": 8,
+        "main": 18,
+    }  # all: 8 = 3 + 3 + 2
+
+    def __init__(self, d_model: int = 64, num_heads: int = 8):
         super(MultiClassTHANet_MK1, self).__init__()
-        self.backbone = EfficientNet.from_pretrained('efficientnet-b3') # 마지막 1000
+        self.backbone = EfficientNet.from_pretrained("efficientnet-b3")  # 마지막 1000
         self.bn = nn.BatchNorm1d(1000)
         self.dropout = nn.Dropout()
-        self.linear_mask = nn.Linear(1000, d_model) # mask
-        self.linear_ageg = nn.Linear(1000, d_model) # ageg
-        self.linear_gender = nn.Linear(1000, d_model) # gender
-        
+        self.linear_mask = nn.Linear(1000, d_model)  # mask
+        self.linear_ageg = nn.Linear(1000, d_model)  # ageg
+        self.linear_gender = nn.Linear(1000, d_model)  # gender
+
         self.w_query = nn.Linear(in_features=d_model, out_features=d_model)
         self.w_key = nn.Linear(in_features=d_model, out_features=d_model)
         self.w_value = nn.Linear(in_features=d_model, out_features=d_model)
@@ -46,12 +53,12 @@ class MultiClassTHANet_MK1(nn.Module):
         self.attention = MultiHeadAttention(d_model=d_model, num_heads=num_heads)
         self.attn_layer_norm = nn.LayerNorm(normalized_shape=d_model)
 
-        self.output_mask = nn.Linear(d_model, self.TASK['mask'])
-        self.output_ageg = nn.Linear(d_model, self.TASK['ageg'])
-        self.output_gender = nn.Linear(d_model, self.TASK['gender'])
+        self.output_mask = nn.Linear(d_model, self.TASK["mask"])
+        self.output_ageg = nn.Linear(d_model, self.TASK["ageg"])
+        self.output_gender = nn.Linear(d_model, self.TASK["gender"])
         self.output_relu = nn.ReLU()
 
-        self.output_main = nn.Linear(self.TASK['all'], self.TASK['main'])
+        self.output_main = nn.Linear(self.TASK["all"], self.TASK["main"])
 
     def forward(self, x):
         x = self.backbone(x)
@@ -61,7 +68,9 @@ class MultiClassTHANet_MK1(nn.Module):
         x_mask = self.linear_mask(x)
         x_ageg = self.linear_ageg(x)
         x_gender = self.linear_gender(x)
-        x_all = torch.cat([x_mask.unsqueeze(1), x_ageg.unsqueeze(1), x_gender.unsqueeze(1)], dim=1) # concat hidden states of mask, ageg, gender
+        x_all = torch.cat(
+            [x_mask.unsqueeze(1), x_ageg.unsqueeze(1), x_gender.unsqueeze(1)], dim=1
+        )  # concat hidden states of mask, ageg, gender
 
         qkv = self._get_qkv(x_all)
         attn_scores = self.attention(*qkv)
@@ -72,7 +81,7 @@ class MultiClassTHANet_MK1(nn.Module):
         x_main = self.output_main(task_outputs)
 
         return x_main
-        
+
     def _get_qkv(self, x):
         q = self.w_query(x)
         k = self.w_key(x)
@@ -95,16 +104,23 @@ class MultiClassTHANet_MK1(nn.Module):
 
 
 class MultiLabelTHANet(nn.Module):
-    TASK = {'mask': 3, 'ageg': 3, 'gender': 2, 'all': 8, 'main': 18} # all: 8 = 3 + 3 + 2
-    def __init__(self, d_model: int=64, num_heads: int=8):
+    TASK = {
+        "mask": 3,
+        "ageg": 3,
+        "gender": 2,
+        "all": 8,
+        "main": 18,
+    }  # all: 8 = 3 + 3 + 2
+
+    def __init__(self, d_model: int = 64, num_heads: int = 8):
         super(MultiLabelTHANet, self).__init__()
-        self.backbone = EfficientNet.from_pretrained('efficientnet-b0') # 마지막 1000
+        self.backbone = EfficientNet.from_pretrained("efficientnet-b0")  # 마지막 1000
         self.bn = nn.BatchNorm1d(1000)
         self.dropout = nn.Dropout()
-        self.linear_mask = nn.Linear(1000, d_model) # mask
-        self.linear_ageg = nn.Linear(1000, d_model) # ageg
-        self.linear_gender = nn.Linear(1000, d_model) # gender
-        
+        self.linear_mask = nn.Linear(1000, d_model)  # mask
+        self.linear_ageg = nn.Linear(1000, d_model)  # ageg
+        self.linear_gender = nn.Linear(1000, d_model)  # gender
+
         self.w_query = nn.Linear(in_features=d_model, out_features=d_model)
         self.w_key = nn.Linear(in_features=d_model, out_features=d_model)
         self.w_value = nn.Linear(in_features=d_model, out_features=d_model)
@@ -112,10 +128,10 @@ class MultiLabelTHANet(nn.Module):
         self.attention = MultiHeadAttention(d_model=d_model, num_heads=num_heads)
         self.attn_layer_norm = nn.LayerNorm(normalized_shape=d_model)
 
-        self.output_mask = nn.Linear(d_model, self.TASK['mask'])
-        self.output_ageg = nn.Linear(d_model, self.TASK['ageg'])
-        self.output_gender = nn.Linear(d_model, self.TASK['gender'])
-        self.output_main = nn.Linear(self.TASK['main'], self.TASK['main'])
+        self.output_mask = nn.Linear(d_model, self.TASK["mask"])
+        self.output_ageg = nn.Linear(d_model, self.TASK["ageg"])
+        self.output_gender = nn.Linear(d_model, self.TASK["gender"])
+        self.output_main = nn.Linear(self.TASK["main"], self.TASK["main"])
 
     def forward(self, x):
         x = self.backbone(x)
@@ -125,7 +141,9 @@ class MultiLabelTHANet(nn.Module):
         x_mask = self.linear_mask(x)
         x_ageg = self.linear_ageg(x)
         x_gender = self.linear_gender(x)
-        x_all = torch.cat([x_mask.unsqueeze(1), x_ageg.unsqueeze(1), x_gender.unsqueeze(1)], dim=1) # concat hidden states of mask, ageg, gender
+        x_all = torch.cat(
+            [x_mask.unsqueeze(1), x_ageg.unsqueeze(1), x_gender.unsqueeze(1)], dim=1
+        )  # concat hidden states of mask, ageg, gender
 
         qkv = self._get_qkv(x_all)
         attn_scores = self.attention(*qkv)
@@ -134,7 +152,7 @@ class MultiLabelTHANet(nn.Module):
         x_all_splited = self._split_task(attn_scores)
         output_mask, output_ageg, output_gender = self._get_task_output(*x_all_splited)
         return output_mask, output_ageg, output_gender
-        
+
     def _get_qkv(self, x):
         q = self.w_query(x)
         k = self.w_key(x)
@@ -154,18 +172,19 @@ class MultiLabelTHANet(nn.Module):
         return x_mask, x_ageg, x_gender
 
 
-class THANet_MK1(nn.Module): # Three-headed attention EfficientNEt
-    NUM_CLASS = {'mask': 3, 'ageg': 3, 'gender': 2, 'main': 18}
-    def __init__(self, freeze: bool=False):
+class THANet_MK1(nn.Module):  # Three-headed attention EfficientNEt
+    NUM_CLASS = {"mask": 3, "ageg": 3, "gender": 2, "main": 18}
+
+    def __init__(self, freeze: bool = False):
         super(THANet_MK1, self).__init__()
-        self.backbone = EfficientNet.from_pretrained('efficientnet-b3')
+        self.backbone = EfficientNet.from_pretrained("efficientnet-b3")
         if freeze:
             self._freeze()
 
-        self.linear_mask = nn.Linear(1000, self.NUM_CLASS['mask'])
-        self.linear_ageg = nn.Linear(1000, self.NUM_CLASS['ageg'])
-        self.linear_gender = nn.Linear(1000, self.NUM_CLASS['gender'])
-        self.linear_main = nn.Linear(1000, self.NUM_CLASS['main'])
+        self.linear_mask = nn.Linear(1000, self.NUM_CLASS["mask"])
+        self.linear_ageg = nn.Linear(1000, self.NUM_CLASS["ageg"])
+        self.linear_gender = nn.Linear(1000, self.NUM_CLASS["gender"])
+        self.linear_main = nn.Linear(1000, self.NUM_CLASS["main"])
 
     def forward(self, x):
         x = self.backbone(x)
@@ -180,32 +199,41 @@ class THANet_MK1(nn.Module): # Three-headed attention EfficientNEt
             param.requires_grad = False
 
 
-class THANet_MK2(nn.Module): # Three-headed attention EfficientNEt
-    NUM_CLASS = {'mask': 3, 'ageg': 3, 'gender': 2, 'main': 18}
+class THANet_MK2(nn.Module):  # Three-headed attention EfficientNEt
+    NUM_CLASS = {"mask": 3, "ageg": 3, "gender": 2, "main": 18}
     PRETRAINED = {
-        'gender': os.path.join(Config.ModelPath, 'VanillaEfficientNet_taskgender_epoch02_lr0.005_transformbase_optimadam_loss0.0001_eval0.9658_seed42.pth'),
-        'mask': os.path.join(Config.ModelPath, 'VanillaEfficientNet_taskmask_epoch04_lr0.005_transformbase_optimadam_loss0.0000_eval0.9909_seed42.pth'),
-        'ageg': os.path.join(Config.ModelPath, 'VanillaEfficientNet_taskageg_epoch04_lr0.005_transformbase_optimadam_loss0.0002_eval0.9118_seed42.pth')
+        "gender": os.path.join(
+            Config.ModelPath,
+            "VanillaEfficientNet_taskgender_epoch02_lr0.005_transformbase_optimadam_loss0.0001_eval0.9658_seed42.pth",
+        ),
+        "mask": os.path.join(
+            Config.ModelPath,
+            "VanillaEfficientNet_taskmask_epoch04_lr0.005_transformbase_optimadam_loss0.0000_eval0.9909_seed42.pth",
+        ),
+        "ageg": os.path.join(
+            Config.ModelPath,
+            "VanillaEfficientNet_taskageg_epoch04_lr0.005_transformbase_optimadam_loss0.0002_eval0.9118_seed42.pth",
+        ),
     }
 
-    def __init__(self, freeze: bool=False):
+    def __init__(self, freeze: bool = False):
         super(THANet_MK2, self).__init__()
-        self.backbone = EfficientNet.from_pretrained('efficientnet-b3')
+        self.backbone = EfficientNet.from_pretrained("efficientnet-b3")
         if freeze:
             self._freeze()
 
-        linear_gender = VanillaEfficientNet(n_class=self.NUM_CLASS['gender'])
-        linear_gender.load_state_dict(torch.load(self.PRETRAINED['gender']))
+        linear_gender = VanillaEfficientNet(n_class=self.NUM_CLASS["gender"])
+        linear_gender.load_state_dict(torch.load(self.PRETRAINED["gender"]))
         self.linear_gender = linear_gender.linear
 
-        linear_mask = VanillaEfficientNet(n_class=self.NUM_CLASS['mask'])
-        linear_mask.load_state_dict(torch.load(self.PRETRAINED['mask']))
+        linear_mask = VanillaEfficientNet(n_class=self.NUM_CLASS["mask"])
+        linear_mask.load_state_dict(torch.load(self.PRETRAINED["mask"]))
         self.linear_mask = linear_mask.linear
 
-        linear_ageg = VanillaEfficientNet(n_class=self.NUM_CLASS['ageg'])
-        linear_ageg.load_state_dict(torch.load(self.PRETRAINED['ageg']))
+        linear_ageg = VanillaEfficientNet(n_class=self.NUM_CLASS["ageg"])
+        linear_ageg.load_state_dict(torch.load(self.PRETRAINED["ageg"]))
         self.linear_ageg = linear_ageg.linear
-        self.linear_main = nn.Linear(1000, self.NUM_CLASS['main'])
+        self.linear_main = nn.Linear(1000, self.NUM_CLASS["main"])
 
     def forward(self, x):
         x = self.backbone(x)
@@ -223,7 +251,7 @@ class THANet_MK2(nn.Module): # Three-headed attention EfficientNEt
 class VanillaEfficientNet(nn.Module):
     def __init__(self, n_class: int, freeze: bool = False):
         super(VanillaEfficientNet, self).__init__()
-        self.efficientnet = EfficientNet.from_pretrained('efficientnet-b3')
+        self.efficientnet = EfficientNet.from_pretrained("efficientnet-b3")
         if freeze:
             self._freeze()
         self.batchnorm = nn.BatchNorm1d(num_features=1000)
