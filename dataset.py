@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader, Dataset
 from torchvision.datasets import DatasetFolder
 from torchvision.datasets.folder import default_loader, IMG_EXTENSIONS
 from augmentation import configure_transform
-from utils import load_pickle, load_json
+from utils import load_pickle, load_json, age2ageg
 from config import Config, Task, Aug
 
 
@@ -58,13 +58,16 @@ def get_dataloader(
 
 
 class TrainDataset(Dataset):
-    def __init__(self, root: str, transform=None, task: str=Task.Main, meta_path:str=None):
+    def __init__(self, root: str, transform=None, task: str=Task.Main, age_filter:int= 60, meta_path:str=None):
         """마스크 상태, 나이, 나이대, 클래스(0~17)의 4가지 태스크에 따른 레이블링을 지원하는 데이터셋
         """
         self.img_paths = glob(os.path.join(root, '*'))
         self.metadata = load_json(meta_path)
         self.task = task
         self.transform = transform
+        self.age_filter = age_filter
+        if age_filter < 60:
+            self.label_encoder = LabelEncoder()
     
     def __getitem__(self, index):
         name = os.path.basename(self.img_paths[index])
@@ -72,7 +75,20 @@ class TrainDataset(Dataset):
         label = self.metadata[name]
 
         if self.task != Task.All:
-            label = label[self.task]
+            if self.task == Task.Main: # Main Task: 0~17 클래스에 대한 예측
+                if label[Task.Age] >= self.age_filter: # 예) 58세 이상을 60세 이상 클래스로 간주할 경우
+                    mask_state = label[Task.Mask]
+                    gender = label[Task.Gender]
+                    ageg = 2 # old class
+                    label = self.label_encoder.transform((mask_state, gender, ageg), task=Task.Main)
+                else:
+                    label = label[self.task]
+
+            elif self.task == Task.Ageg:
+                label = 2 if label[Task.Age] >= self.age_filter else label[self.task] # 예) 58세 이상을 60세 이상 클래스로 간주할 경우
+
+            else:
+                label = label[self.task]
 
         if self.transform is not None:
             img = self.transform(img)
@@ -105,6 +121,7 @@ class CustomImageFolder(DatasetFolder):
     def __init__(self, root, transform=None, target_transform=None, loader=default_loader, is_valid_file=None):
         args = (loader, IMG_EXTENSIONS, transform, target_transform, is_valid_file)
         super(CustomImageFolder, self).__init__(root, *args)
+        
     def _find_classes(self, dir):
         classes = [d.name for d in os.scandir(dir) if d.is_dir()]
         classes.sort(key=lambda x: int(x))

@@ -7,7 +7,6 @@ class Config:
     Valid: str = "./preprocessed/test"
     TrainS: str = "./preprocessed_stratified/train"
     ValidS: str = "./preprocessed_stratified/test"
-
     Eval: str = "./input/data/eval/images"
 
     Batch64: int = 64
@@ -20,7 +19,7 @@ class Config:
     AdamP: str = 'adamp'
     SGD: str = 'sgd'
     Momentum: str = 'momentum'
-    Epochs: int = 50
+    Epochs: int = 20
     Seed: int = 42
 
     VanillaResNet: str = "VanillaResNet"

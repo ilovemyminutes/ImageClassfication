@@ -17,7 +17,7 @@ def age2ageg(age):
 def get_timestamp():
     KST = datetime.timezone(datetime.timedelta(hours=9))
     now = datetime.datetime.now(tz=KST)
-    now2str = now.strftime("%Y/%m/%d %H:%M:%S")
+    now2str = now.strftime("%Y%m%d%H%M%S")
     return now2str
 
 def save_pickle(path: str, f: object) -> None:
