@@ -10,6 +10,27 @@ from utils import load_pickle, load_json
 from config import Config, Task, Aug
 
 
+MULTI2MAIN = { 
+    (1,0,0): 0, # (mask, gender, ageg) 
+    (1,0,1): 1,
+    (1,0,2): 2,
+    (1,1,0): 3,
+    (1,1,1): 4,
+    (1,1,2): 5,
+    (0,0,0): 6,
+    (0,0,1): 7,
+    (0,0,2): 8,
+    (0,1,0): 9,
+    (0,1,1): 10,
+    (0,1,2): 11,
+    (2,0,0): 12,
+    (2,0,1): 13,
+    (2,0,2): 14,
+    (2,1,0): 15,
+    (2,1,1): 16,
+    (2,1,2): 17,
+}
+
 def get_dataloader(
     task: str=Task.Main, # class, gender, ageg, age
     phase: str='train',
@@ -62,19 +83,10 @@ class TrainDataset(Dataset):
         return len(self.img_paths)
 
 
-class CustomImageFolder(DatasetFolder):
-    def __init__(self, root, transform=None, target_transform=None, loader=default_loader, is_valid_file=None):
-        args = (loader, IMG_EXTENSIONS, transform, target_transform, is_valid_file)
-        super(CustomImageFolder, self).__init__(root, *args)
-    def _find_classes(self, dir):
-        classes = [d.name for d in os.scandir(dir) if d.is_dir()]
-        classes.sort(key=lambda x: int(x))
-        class_to_idx = {classes[i]: i for i in range(len(classes))}
-        return classes, class_to_idx
-
-
 class EvalDataset(Dataset):
     def __init__(self, root, transform=None, info_path: str=Config.Info):
+        if not os.path.isfile(info_path):
+            info_path = '../preprocessed/info.pkl' # for notebook env
         info = load_pickle(info_path) # 추론 순서를 맞추기 위해
         self.img_paths = list(map(lambda x: os.path.join(root, x), info))
         self.transform = transform
@@ -89,12 +101,23 @@ class EvalDataset(Dataset):
     def __len__(self):
         return len(self.img_paths)
 
+class CustomImageFolder(DatasetFolder):
+    def __init__(self, root, transform=None, target_transform=None, loader=default_loader, is_valid_file=None):
+        args = (loader, IMG_EXTENSIONS, transform, target_transform, is_valid_file)
+        super(CustomImageFolder, self).__init__(root, *args)
+    def _find_classes(self, dir):
+        classes = [d.name for d in os.scandir(dir) if d.is_dir()]
+        classes.sort(key=lambda x: int(x))
+        class_to_idx = {classes[i]: i for i in range(len(classes))}
+        return classes, class_to_idx
+
 
 class LabelEncoder:
     Encoder= {
         'mask': {'incorrect': 0, 'wear': 1, 'not_wear': 2},
         'gender': {'male': 0, 'female': 1},
-        'ageg': {'young': 0, 'middle': 1, 'old': 2}
+        'ageg': {'young': 0, 'middle': 1, 'old': 2},
+        'main': MULTI2MAIN
         }
     Decoder= {
         'mask': {0: 'incorrect', 1:'wear', 2:'not_wear'},
