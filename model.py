@@ -49,7 +49,7 @@ class MultiClassTHANet_MK1(nn.Module):
         self.output_mask = nn.Linear(d_model, self.TASK['mask'])
         self.output_ageg = nn.Linear(d_model, self.TASK['ageg'])
         self.output_gender = nn.Linear(d_model, self.TASK['gender'])
-        self.output_layer_norm = nn.LayerNorm(normalized_shape=self.TASK['all'])
+        self.output_relu = nn.ReLU()
 
         self.output_main = nn.Linear(self.TASK['all'], self.TASK['main'])
 
@@ -90,7 +90,7 @@ class MultiClassTHANet_MK1(nn.Module):
         output_ageg = self.output_ageg(x_ageg)
         output_gender = self.output_gender(x_gender)
         output = torch.cat([output_mask, output_ageg, output_gender], dim=1)
-        output = self.output_layer_norm(output)
+        output = self.output_relu(output)
         return output
 
 

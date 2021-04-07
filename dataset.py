@@ -15,7 +15,7 @@ def get_dataloader(
     phase: str='train',
     data_root: str=Config.Train,
     transform_type: str=Aug.BaseTransform,
-    batch_size: int = Config.BatchSize,
+    batch_size: int = Config.Batch32,
     shuffle: bool = True,
     drop_last: bool = True,
 ):

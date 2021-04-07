@@ -10,14 +10,17 @@ class Config:
 
     Eval: str = "./input/data/eval/images"
 
-    BatchSize: int = 64
-    LR: float = 5e-3
+    Batch64: int = 64
+    Batch32: int = 32
+    LRBase: float = 5e-3
+    LRFaster: float = 1e-2
+    LRSlower: float = 1e-3
     CosineScheduler: str = 'cosine'
     Adam: str = 'adam'
     AdamP: str = 'adamp'
     SGD: str = 'sgd'
     Momentum: str = 'momentum'
-    Epochs: int = 30
+    Epochs: int = 50
     Seed: int = 42
 
     VanillaResNet: str = "VanillaResNet"

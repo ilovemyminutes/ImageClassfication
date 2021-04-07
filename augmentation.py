@@ -13,7 +13,6 @@ def configure_transform(phase: str, transform_type: str):
                     transforms.Resize((512, 384), Image.BILINEAR),
                     transforms.CenterCrop((384, 384)),
                     transforms.RandomResizedCrop((224, 224)),
-                    transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1),
                     transforms.ToTensor(),
                     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
                 ]

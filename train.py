@@ -16,7 +16,7 @@ from optims import get_optim, get_scheduler
 import wandb
 
 
-VALID_CYCLE = 200
+VALID_CYCLE = 250
 
 
 def train(
@@ -27,10 +27,10 @@ def train(
     valid_root: str = Config.ValidS,
     transform_type: str = Aug.BaseTransform,  # 적용할 transform
     epochs: int = Config.Epochs,
-    batch_size: int = Config.BatchSize,
+    batch_size: int = Config.Batch32,
     optim_type: str = Config.Adam,
     loss_type: str = Loss.CE,
-    lr: float = Config.LR,
+    lr: float = Config.LRBase,
     lr_scheduler: str = Config.CosineScheduler,
     save_path: str = Config.ModelPath,
     seed: int = Config.Seed,
@@ -47,7 +47,9 @@ def train(
 
     optimizer = get_optim(model, optim_type=optim_type, lr=lr)
     criterion = get_criterion(loss_type=loss_type, task=task)
-    scheduler = get_scheduler(scheduler_type=lr_scheduler, optimizer=optimizer)
+
+    if lr_scheduler is not None:
+        scheduler = get_scheduler(scheduler_type=lr_scheduler, optimizer=optimizer)
 
     best_f1 = 0
 
@@ -80,7 +82,8 @@ def train(
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
-                scheduler.step()
+                if lr_scheduler is not None:
+                    scheduler.step()
 
                 train_loss = total_loss / num_samples
 
@@ -133,7 +136,7 @@ def train(
             )
 
             if save_path and valid_f1 >= best_f1:
-                name = f"{model_type}_task({task})ep({epoch:0>2d})f1({valid_f1:.4f})loss({valid_loss:.4f})lr({lr})trans({transform_type})optim({optim_type})crit({loss_type})seed({seed}).pth"
+                name = f"{model_type}_task({task})ep({epoch:0>2d})f1({valid_f1:.4f})bs({batch_size})loss({valid_loss:.4f})lr({lr})trans({transform_type})optim({optim_type})crit({loss_type})seed({seed}).pth"
                 best_f1 = valid_f1
                 torch.save(model.state_dict(), os.path.join(save_path, name))
 
@@ -225,7 +228,7 @@ def train(
             )
 
             if save_path:
-                name = f"{model_type}_task({task})ep({epoch:0>2d})f1({valid_f1:.4f})loss({valid_mse:.4f})lr({lr})trans({transform_type})optim({optim_type})crit({loss_type})seed({seed}).pth"
+                name = f"{model_type}_task({task})ep({epoch:0>2d})f1({valid_f1:.4f})bs({batch_size})loss({valid_mse:.4f})lr({lr})trans({transform_type})optim({optim_type})crit({loss_type})seed({seed}).pth"
                 torch.save(model.state_dict(), os.path.join(save_path, name))
 
 
@@ -316,17 +319,17 @@ if __name__ == "__main__":
     LOAD_STATE_DICT = None
 
     parser = argparse.ArgumentParser()
-    parser.add_argument( "--task", type=str, default=Task.Ageg)
-    parser.add_argument( "--model-type", type=str, default=Config.VanillaEfficientNet)
-    parser.add_argument( "--load-state-dict", type=str, default=LOAD_STATE_DICT)
-    parser.add_argument( "--train-root", type=str, default=Config.Train)
-    parser.add_argument( "--valid-root", type=str, default=Config.Valid)
-    parser.add_argument( "--transform-type", type=str, default=Aug.Random)
+    parser.add_argument("--task", type=str, default=Task.Main)       
+    parser.add_argument("--model-type", type=str, default=Config.VanillaEfficientNet)
+    parser.add_argument("--load-state-dict", type=str, default=LOAD_STATE_DICT)
+    parser.add_argument("--train-root", type=str, default=Config.Train)
+    parser.add_argument("--valid-root", type=str, default=Config.Valid)
+    parser.add_argument("--transform-type", type=str, default=Aug.BaseTransform)
     parser.add_argument("--epochs",type=int,default=Config.Epochs)
-    parser.add_argument("--batch-size",type=int,default=Config.BatchSize)
+    parser.add_argument("--batch-size",type=int,default=Config.Batch64)
     parser.add_argument("--optim-type",type=str,default=Config.Adam)
     parser.add_argument("--loss-type",type=str,default=Loss.LS)
-    parser.add_argument("--lr",type=float,default=Config.LR)
+    parser.add_argument("--lr",type=float,default=Config.LRBase)
     parser.add_argument("--lr-scheduler",type=str,default=Config.CosineScheduler)
     parser.add_argument("--seed",type=int,default=Config.Seed)
     parser.add_argument("--save-path",type=str,default=Config.ModelPath)
