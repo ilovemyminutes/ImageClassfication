@@ -575,7 +575,7 @@ if __name__ == "__main__":
 
     if args.cv is not None:
         print(
-            "Welcome to K Cross Validation Train! If you check it works, then you can go to sleep😴"
+            "Welcome to K-Fold CV Train! If you check it works, then you can go to sleep...😴"
         )
         train_cv(**vars(args))
     else:

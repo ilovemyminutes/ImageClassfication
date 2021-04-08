@@ -1,4 +1,4 @@
-# Daily Logs - Image Classification
+# Image Classification
 
 향후 모든 기록은 [이곳](https://www.notion.so/iloveslowfood/Stage-2-Image-Classification-58dbfca2e1ef4e36b8de6790b403ccba)에 업데이트됩니다.
 

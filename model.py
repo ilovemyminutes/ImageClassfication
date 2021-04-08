@@ -9,6 +9,18 @@ from config import Config, get_class_num
 
 
 def load_model(model_type: str, task: str, load_state_dict: str, freeze: bool = False):
+    """모델 아키텍쳐를 불러오는 함수
+    - 주어진 task가 마스크 상태, 성별, 연령대의 3가지 세부 task로 나뉨에 따라, 각각의 task에 맞게 output을 조정한 모델을 반환한다.
+
+    Args:
+        model_type (str): 모델명. 'VanillaResNet', 'VanillaEfficientNet', 'MultiClassTHANet', 'MultiClassTHANet_MK1' 등이 있다.
+        task (str): 예측할 task. 'main(주어진 task)', 'mask(마스크 상태)', 'gender(성별)', 'ageg(연령대)', 'age(연령)'의 4가지를 중 하나를 입력
+        load_state_dict (str): 사전 학습한 파라미터의 경로. 있을 경우 해당 파라미터를 모델로 불러와 모델을 반환하게 된다.
+        freeze (bool, optional): True일 경우 ResNet, EfficientNet 등의 pretrained 모델을 불러올 때 말단 레이어를 제외한 부분을 학습 불가능하도록 통제
+
+    Returns:
+        model: 지정한 task에 맞는 모델을 반환
+    """    
     n_class = get_class_num(task)
     if model_type == "VanillaResNet":
         model = VanillaResNet(n_class, freeze)
@@ -27,6 +39,59 @@ def load_model(model_type: str, task: str, load_state_dict: str, freeze: bool = 
         print(f"Loaded pretrained weights from {load_state_dict}")
     return model
 
+
+class VanillaEfficientNet(nn.Module):
+    """Pretrained EfficientNet을 backbone으로 하는 모델
+    성능 개선과 오버피팅 방지를 위해 Batch Normalization, Dropout, ReLU 레이어를 추가한 형태
+    """    
+    def __init__(self, n_class: int, freeze: bool = False):
+        super(VanillaEfficientNet, self).__init__()
+        self.efficientnet = EfficientNet.from_pretrained("efficientnet-b3")
+        if freeze:
+            self._freeze()
+        self.batchnorm = nn.BatchNorm1d(num_features=1000)
+        self.dropout = nn.Dropout()
+        self.relu = nn.ReLU()
+        self.linear = nn.Linear(in_features=1000, out_features=n_class)
+
+    def forward(self, x):
+        x = self.efficientnet(x)
+        x = self.batchnorm(x)
+        x = self.dropout(x)
+        x = self.relu(x)
+        output = self.linear(x)
+        return output
+
+    def _freeze(self):
+        for param in self.efficientnet.parameters(): # backbone 모델의 파라미터가 학습되지 않도록 통제
+            param.requires_grad = False
+
+
+class VanillaResNet(nn.Module):
+    """Pretrained ResNet을 backbone으로 하는 모델
+    성능 개선과 오버피팅 방지를 위해 Batch Normalization, Dropout, ReLU 레이어를 추가한 형태
+    """    
+    def __init__(self, n_class: int, freeze: bool = False):
+        super(VanillaResNet, self).__init__()
+        self.resnet = models.resnet50(pretrained=True)
+        if freeze:
+            self._freeze()
+        self.batchnorm = nn.BatchNorm1d(num_features=1000)
+        self.dropout = nn.Dropout()
+        self.relu = nn.ReLU()
+        self.linear = nn.Linear(in_features=1000, out_features=n_class)
+
+    def forward(self, x):
+        x = self.resnet(x)
+        x = self.batchnorm(x)
+        x = self.dropout(x)
+        x = self.relu(x)
+        output = self.linear(x)
+        return output
+
+    def _freeze(self):
+        for param in self.resnet.parameters(): # backbone 모델의 파라미터가 학습되지 않도록 통제
+            param.requires_grad = False
 
 class MultiClassTHANet_MK1(nn.Module):
     TASK = {
@@ -246,55 +311,6 @@ class THANet_MK2(nn.Module):  # Three-headed attention EfficientNEt
     def _freeze(self):
         for param in self.backbone.parameters():
             param.requires_grad = False
-
-
-class VanillaEfficientNet(nn.Module):
-    def __init__(self, n_class: int, freeze: bool = False):
-        super(VanillaEfficientNet, self).__init__()
-        self.efficientnet = EfficientNet.from_pretrained("efficientnet-b3")
-        if freeze:
-            self._freeze()
-        self.batchnorm = nn.BatchNorm1d(num_features=1000)
-        self.dropout = nn.Dropout()
-        self.relu = nn.ReLU()
-        self.linear = nn.Linear(in_features=1000, out_features=n_class)
-
-    def forward(self, x):
-        x = self.efficientnet(x)
-        x = self.batchnorm(x)
-        x = self.dropout(x)
-        x = self.relu(x)
-        output = self.linear(x)
-        return output
-
-    def _freeze(self):
-        for param in self.efficientnet.parameters():
-            param.requires_grad = False
-
-
-class VanillaResNet(nn.Module):
-    def __init__(self, n_class: int, freeze: bool = False):
-        super(VanillaResNet, self).__init__()
-        self.resnet = models.resnet50(pretrained=True)
-        if freeze:
-            self._freeze()
-        self.batchnorm = nn.BatchNorm1d(num_features=1000)
-        self.dropout = nn.Dropout()
-        self.relu = nn.ReLU()
-        self.linear = nn.Linear(in_features=1000, out_features=n_class)
-
-    def forward(self, x):
-        x = self.resnet(x)
-        x = self.batchnorm(x)
-        x = self.dropout(x)
-        x = self.relu(x)
-        output = self.linear(x)
-        return output
-
-    def _freeze(self):
-        for name, param in self.resnet.named_parameters():
-            if name not in ["fc.weight", "fc.bias"]:
-                param.requires_grad = False
 
 
 class MultiHeadAttention(nn.Module):
