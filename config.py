@@ -19,7 +19,7 @@ class Config:
     AdamP: str = "adamp"
     SGD: str = "sgd"
     Momentum: str = "momentum"
-    Epochs: int = 20
+    Epochs: int = 30
     Seed: int = 42
 
     VanillaResNet: str = "VanillaResNet"
@@ -29,7 +29,9 @@ class Config:
     MultiLabelTHANet: str = "MultiLabelTHANet"
     THANet_MK1: str = "THANet_MK1"  # wrong structure yet
     THANet_MK2: str = "THANet_MK2"  # wrong structure yet
+    Ensemble: str = 'Ensemble'
     ModelPath: str = "./saved_models"
+    
 
     Inference: str = "./prediction"
     Metadata: str = "./preprocessed_stratified/metadata.json"
@@ -42,6 +44,7 @@ class Aug:
     FaceCrop: str = "facecrop"
     FixTransform: str = "fix"
     Random: str = "random"
+    TTA: str = 'tta'
 
 
 @dataclass
@@ -52,7 +55,7 @@ class Task:
     AgeC: str = "age_clf"
     Ageg: str = "ageg"
     Main: str = "main"
-    All: str = "all"
+    MultiLabel: str = "all"
 
 
 @dataclass

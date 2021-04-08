@@ -241,6 +241,7 @@ def train_cv(
     train_root: str = Config.TrainS,  # 데이터 경로
     valid_root: str = Config.ValidS,
     transform_type: str = Aug.BaseTransform,  # 적용할 transform
+    age_filter: int=58,
     epochs: int = Config.Epochs,
     cv: int = 5,
     batch_size: int = Config.Batch32,
@@ -255,10 +256,11 @@ def train_cv(
         kfold_dir = f"kfold_{model_type}_" + get_timestamp()
         if kfold_dir not in os.listdir(save_path):
             os.mkdir(os.path.join(save_path, kfold_dir))
+        print(f'Models will be saved in {os.path.join(save_path, kfold_dir)}.')
 
     set_seed(seed)
     transform = configure_transform(phase="train", transform_type=transform_type)
-    trainset = TrainDataset(root=train_root, transform=transform, batch_size=batch_size)
+    trainset = TrainDataset(root=train_root, transform=transform, task=task, age_filter=age_filter, meta_path=Config.Metadata)
     validloader = get_dataloader(
         task, "valid", valid_root, transform_type, 1024, shuffle=False, drop_last=False
     )
@@ -268,6 +270,7 @@ def train_cv(
     for fold_idx, (train_indices, _) in enumerate(
         kfold.split(trainset)
     ):  # 앙상블이 목적이므로 test 인덱스는 따로 사용하지 않고, validloader를 통해 성능 검증
+        if fold_idx == 0 or fold_idx == 1 or fold_idx == 2 or fold_idx == 3: continue
         print(f"Train Fold #{fold_idx}")
         train_sampler = SubsetRandomSampler(train_indices)
         trainloader = DataLoader(
@@ -454,6 +457,7 @@ def train_cv(
                     torch.save(
                         model.state_dict(), os.path.join(save_path, kfold_dir, name)
                     )
+        model.cpu()
 
 
 def validate(task, model, validloader, criterion):
@@ -544,11 +548,12 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", type=str, default=Task.Main)
-    parser.add_argument("--model-type", type=str, default=Config.VanillaResNet)
+    parser.add_argument("--model-type", type=str, default=Config.VanillaEfficientNet)
     parser.add_argument("--load-state-dict", type=str, default=LOAD_STATE_DICT)
     parser.add_argument("--train-root", type=str, default=Config.Train)
     parser.add_argument("--valid-root", type=str, default=Config.Valid)
     parser.add_argument("--transform-type", type=str, default=Aug.Random)
+    parser.add_argument("--age-filter", type=int, default=58)
     parser.add_argument("--epochs", type=int, default=Config.Epochs)
     parser.add_argument("--cv", type=int, default=None)
     parser.add_argument("--batch-size", type=int, default=Config.Batch32)

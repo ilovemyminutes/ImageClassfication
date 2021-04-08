@@ -77,15 +77,14 @@ class TrainDataset(Dataset):
         self.task = task
         self.transform = transform
         self.age_filter = age_filter
-        if age_filter < 60:
-            self.label_encoder = LabelEncoder()
+        self.label_encoder = LabelEncoder()
 
     def __getitem__(self, index):
         name = os.path.basename(self.img_paths[index])
         img = Image.open(self.img_paths[index])
         label = self.metadata[name]
 
-        if self.task != Task.All:
+        if self.task != Task.MultiLabel:
             if self.task == Task.Main:  # Main Task: 0~17 클래스에 대한 예측
                 if label[Task.Age] >= self.age_filter:  # 예) 58세 이상을 60세 이상 클래스로 간주할 경우
                     mask_state = label[Task.Mask]
