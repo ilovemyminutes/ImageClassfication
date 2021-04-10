@@ -3,11 +3,12 @@ from torchvision import transforms
 from PIL import Image
 import cv2
 from RandAugment import RandAugment
+from config import Aug
 
 
 def configure_transform(phase: str, transform_type: str):
     if phase == "train":
-        if transform_type == "base":
+        if transform_type == Aug.BaseTransform:
             transform = transforms.Compose(
                 [
                     transforms.Resize((512, 384), Image.BILINEAR),
@@ -17,7 +18,7 @@ def configure_transform(phase: str, transform_type: str):
                     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
                 ]
             )
-        elif transform_type == "facecrop":
+        elif transform_type == Aug.FaceCrop:
             transform = transforms.Compose(
                 [
                     transforms.Lambda(lambda x: crop(x)),
@@ -27,7 +28,7 @@ def configure_transform(phase: str, transform_type: str):
                     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
                 ]
             )
-        elif transform_type == "random":
+        elif transform_type == Aug.Random:
             transform = transforms.Compose(
                 [
                     transforms.CenterCrop((384, 384)),
@@ -38,7 +39,7 @@ def configure_transform(phase: str, transform_type: str):
                 ]
             )
 
-        elif transform_type == 'tta': # 'random'과 동일
+        elif transform_type == Aug.TTA: # 'random'과 동일
             transform = transforms.Compose(
                 [
                     transforms.CenterCrop((384, 384)),
@@ -53,7 +54,7 @@ def configure_transform(phase: str, transform_type: str):
             raise NotImplementedError()
 
     else:
-        if transform_type == "base":
+        if transform_type == Aug.BaseTransform:
             transform = transforms.Compose(
                 [
                     transforms.Resize((512, 384), Image.BILINEAR),
@@ -62,7 +63,7 @@ def configure_transform(phase: str, transform_type: str):
                     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
                 ]
             )
-        elif transform_type == "facecrop":
+        elif transform_type == Aug.FaceCrop:
             transform = transforms.Compose(
                 [
                     transforms.Lambda(lambda x: crop(x)),
@@ -73,7 +74,7 @@ def configure_transform(phase: str, transform_type: str):
                 ]
             )
 
-        elif transform_type == "random":
+        elif transform_type == Aug.Random:
             transform = transforms.Compose(
                 [
                     transforms.CenterCrop((224, 224)),
@@ -82,7 +83,7 @@ def configure_transform(phase: str, transform_type: str):
                 ]
             )
         
-        elif transform_type == 'tta':
+        elif transform_type == Aug.TTA:
             transform = transforms.Compose(
                 [
                     transforms.CenterCrop((384, 384)),
