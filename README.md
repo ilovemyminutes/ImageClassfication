@@ -1,12 +1,12 @@
 # Image Classification
 
-향후 모든 기록은 [이곳](https://www.notion.so/iloveslowfood/Stage-2-Image-Classification-58dbfca2e1ef4e36b8de6790b403ccba)에 업데이트됩니다.
+Daily Contributions는 [이곳](https://www.notion.so/iloveslowfood/Stage-2-Image-Classification-58dbfca2e1ef4e36b8de6790b403ccba)에 업데이트됩니다.
 
 ## Task Description
 
-- ***Problem Type.\*** Classification - 마스크/성별/연령대에 따른 18개 클래스
-- ***Metric.\*** Macro F1 Score
-- ***Data.\*** 한 명당 7장(마스크 착용x1, 미착용x1, 불완전 착용x5) ,총 *2*,700명의 이미지. 한 사람당 384x512
+- ***Problem Type.*** Classification - 마스크/성별/연령대에 따른 18개 클래스
+- ***Metric.*** Macro F1 Score
+- ***Data.*** 한 명당 7장(마스크 착용x1, 미착용x1, 불완전 착용x5) ,총 *2*,700명의 이미지. 한 사람당 384x512
 
 
 
