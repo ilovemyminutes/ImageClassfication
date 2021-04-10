@@ -22,9 +22,9 @@
 
 - ***Structure***: K-Fold Ensemble using VanillaEfficientNet Architecture
 
-  ![ensemble_1](C:\Users\iloveslowfood\Documents\workspace\ImageClassfication\etc\ensemble_1.png)
+  ![ensemble_1](https://github.com/iloveslowfood/ImageClassfication/blob/main/etc/ensemble_1.png?raw=true)
 
-  ![ensemble_2](C:\Users\iloveslowfood\Documents\workspace\ImageClassfication\etc\ensemble_2.png)
+  ![ensemble_2](https://github.com/iloveslowfood/ImageClassfication/blob/main/etc/ensemble_2.png?raw=true)
 
 - ***Hyper Parameters***
 
