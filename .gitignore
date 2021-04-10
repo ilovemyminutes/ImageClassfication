@@ -2,7 +2,8 @@
 고지형_T1002.zip
 
 # notebooks
-notebooks/*.ipynb
+./notebooks/*.ipynb
+./notebooks/*\
 
 # Data
 input/data/eval/*.csv
