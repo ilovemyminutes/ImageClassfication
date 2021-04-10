@@ -1,6 +1,8 @@
 # 🤸‍♂️Image Classification
 
-* ✔모든 Daily Contributions는 [이곳](https://www.notion.so/iloveslowfood/Stage-2-Image-Classification-58dbfca2e1ef4e36b8de6790b403ccba)에 업데이트되어 있습니다.
+✔생생한 Daily Contributions는 [이곳](https://www.notion.so/iloveslowfood/Stage-2-Image-Classification-58dbfca2e1ef4e36b8de6790b403ccba)에 업로드되어 있습니다:)
+
+
 
 ## Task Description
 
