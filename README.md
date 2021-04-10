@@ -12,45 +12,45 @@ Daily Contributions는 [이곳](https://www.notion.so/iloveslowfood/Stage-2-Imag
 
 ## Performances
 
-- F1 0.7706, Private LB 0.7604
+##### Public LB F1 0.7706, Private LB 0.7604
 
-- Configuration
+##### Configuration
 
-  ```python
-  batch_size=32
-  epochs=모델 별 상이
-  loss_type='labelsmoothingLoss'
-  lr=0.001
-  lr_scheduler='cosine'
-  model_type='VanillaEfficientNet'
-  optim_type='adam'
-  seed=42
-  transform_type='tta'
-  
-  # 'tta' transform
-  # train phase
-  transforms.Compose(
-      [
-          transforms.CenterCrop((384, 384)),
-          transforms.RandomResizedCrop((224, 224)),
-          RandAugment(2, 9), # (N, M): (# of transform candidates, # of changes)
-          transforms.ToTensor(),
-          transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-      ]
-  )
-  
-  # test phase
-  transforms.Compose(
-      [
-          transforms.CenterCrop((384, 384)),
-          transforms.RandomResizedCrop((224, 224)),
-          transforms.ToTensor(),
-          transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-      ]
-  )
-  ```
+```python
+batch_size=32
+epochs=모델 별 상이
+loss_type='labelsmoothingLoss'
+lr=0.001
+lr_scheduler='cosine'
+model_type='VanillaEfficientNet'
+optim_type='adam'
+seed=42
+transform_type='tta'
 
-  
+# 'tta' transform
+# train phase
+transforms.Compose(
+    [
+        transforms.CenterCrop((384, 384)),
+        transforms.RandomResizedCrop((224, 224)),
+        RandAugment(2, 9), # (N, M): (# of transform candidates, # of changes)
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+    ]
+)
+
+# test phase
+transforms.Compose(
+    [
+        transforms.CenterCrop((384, 384)),
+        transforms.RandomResizedCrop((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+    ]
+)
+```
+
+
 
 ## Command Line Interface
 
