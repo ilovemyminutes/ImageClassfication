@@ -1,9 +1,10 @@
-# Image Classification
+# 🤸‍♂️Image Classification
 
-Daily Contributions는 [이곳](https://www.notion.so/iloveslowfood/Stage-2-Image-Classification-58dbfca2e1ef4e36b8de6790b403ccba)에 업데이트됩니다.
+* ✔모든 Daily Contributions는 [이곳](https://www.notion.so/iloveslowfood/Stage-2-Image-Classification-58dbfca2e1ef4e36b8de6790b403ccba)에 업데이트되어 있습니다.
 
 ## Task Description
 
+- ***Period.*** 2021.03.29~2021.04.08
 - ***Problem Type.*** Classification - 마스크/성별/연령대에 따른 18개 클래스
 - ***Metric.*** Macro F1 Score
 - ***Data.*** 한 명당 7장(마스크 착용x1, 미착용x1, 불완전 착용x5) ,총 *2*,700명의 이미지. 한 사람당 384x512
@@ -12,43 +13,54 @@ Daily Contributions는 [이곳](https://www.notion.so/iloveslowfood/Stage-2-Imag
 
 ## Performances
 
-##### Public LB F1 0.7706, Private LB 0.7604
+##### *Score*
 
-##### Configuration
+- Public LB.  F1 0.7706, Accuracy 81.3333%
+- Private LB. F1 0.7604, Accuracy 81.0952%
 
-```python
-batch_size=32
-epochs=모델 별 상이
-loss_type='labelsmoothingLoss'
-lr=0.001
-lr_scheduler='cosine'
-model_type='VanillaEfficientNet'
-optim_type='adam'
-seed=42
-transform_type='tta'
+##### Best Model Configuration
 
-# 'tta' transform
-# train phase
-transforms.Compose(
-    [
-        transforms.CenterCrop((384, 384)),
-        transforms.RandomResizedCrop((224, 224)),
-        RandAugment(2, 9), # (N, M): (# of transform candidates, # of changes)
-        transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-    ]
-)
+- ***Structure***: K-Fold Ensemble using VanillaEfficientNet Architecture
 
-# test phase
-transforms.Compose(
-    [
-        transforms.CenterCrop((384, 384)),
-        transforms.RandomResizedCrop((224, 224)),
-        transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-    ]
-)
-```
+  ![ensemble_1](C:\Users\iloveslowfood\Documents\workspace\ImageClassfication\etc\ensemble_1.png)
+
+  ![ensemble_2](C:\Users\iloveslowfood\Documents\workspace\ImageClassfication\etc\ensemble_2.png)
+
+- ***Hyper Parameters***
+
+  ```python
+  batch_size=32
+  epochs=모델 별 상이
+  loss_type='labelsmoothingLoss'
+  lr=0.001
+  lr_scheduler='cosine' # cosine annealing warm restart
+  model_type='VanillaEfficientNet'
+  optim_type='adam'
+  seed=42
+  transform_type='tta'
+  
+  # 'tta' transform
+  # train phase
+  transforms.Compose(
+      [
+          transforms.CenterCrop((384, 384)),
+          transforms.RandomResizedCrop((224, 224)),
+          RandAugment(2, 9), # (N, M): (# of transform candidates, # of changes)
+          transforms.ToTensor(),
+          transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+      ]
+  )
+  
+  # test phase
+  transforms.Compose(
+      [
+          transforms.CenterCrop((384, 384)),
+          transforms.RandomResizedCrop((224, 224)),
+          transforms.ToTensor(),
+          transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+      ]
+  )
+  ```
 
 
 
