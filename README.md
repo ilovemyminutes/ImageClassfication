@@ -15,54 +15,54 @@
 
 ## Performances
 
-##### *Score*
+#### *Score*s
 
 - Public LB.  F1 0.7706, Accuracy 81.3333%
 - Private LB. F1 0.7604, Accuracy 81.0952%
 
-##### Best Model Configuration
+#### *Best Model Configuration*
 
-- ***Structure***: K-Fold Ensemble using VanillaEfficientNet Architecture
+##### ***Structure***: K-Fold Ensemble using VanillaEfficientNet Architecture
 
-  ![ensemble_1](https://github.com/iloveslowfood/ImageClassfication/blob/main/etc/ensemble_1.png?raw=true)
+![ensemble_1](https://github.com/iloveslowfood/ImageClassfication/blob/main/etc/ensemble_1.png?raw=true)
 
-  ![ensemble_2](https://github.com/iloveslowfood/ImageClassfication/blob/main/etc/ensemble_2.png?raw=true)
+![ensemble_2](https://github.com/iloveslowfood/ImageClassfication/blob/main/etc/ensemble_2.png?raw=true)
 
-- ***Hyper Parameters***
+##### ***Hyper Parameters***
 
-  ```python
-  batch_size=32
-  epochs=모델 별 상이
-  loss_type='labelsmoothingLoss'
-  lr=0.001
-  lr_scheduler='cosine' # cosine annealing warm restart
-  model_type='VanillaEfficientNet'
-  optim_type='adam'
-  seed=42
-  transform_type='tta'
-  
-  # 'tta' transform
-  # train phase
-  transforms.Compose(
-      [
-          transforms.CenterCrop((384, 384)),
-          transforms.RandomResizedCrop((224, 224)),
-          RandAugment(2, 9), # (N, M): (# of transform candidates, # of changes)
-          transforms.ToTensor(),
-          transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-      ]
-  )
-  
-  # test phase
-  transforms.Compose(
-      [
-          transforms.CenterCrop((384, 384)),
-          transforms.RandomResizedCrop((224, 224)),
-          transforms.ToTensor(),
-          transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-      ]
-  )
-  ```
+```python
+batch_size=32
+epochs=모델 별 상이
+loss_type='labelsmoothingLoss'
+lr=0.001
+lr_scheduler='cosine' # cosine annealing warm restart
+model_type='VanillaEfficientNet'
+optim_type='adam'
+seed=42
+transform_type='tta'
+
+# 'tta' transform
+# train phase
+transforms.Compose(
+    [
+        transforms.CenterCrop((384, 384)),
+        transforms.RandomResizedCrop((224, 224)),
+        RandAugment(2, 9), # (N, M): (# of transform candidates, # of changes)
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+    ]
+)
+
+# test phase
+transforms.Compose(
+    [
+        transforms.CenterCrop((384, 384)),
+        transforms.RandomResizedCrop((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+    ]
+)
+```
 
 
 
@@ -74,7 +74,7 @@
 >>> python train.py --task 'main' --model-type 'VanillaEfficientNet' --cv 5
 ```
 
-- 18가지 카테고리를 분류하는 Main Task 이외에 마스크 상태, 연령대(classification) 및 연령(regression), 성별의 4가지 sub task에 대한 학습을 모두 지원하며, K-Fold CV 학습 또한 가능합니다. 조정 가능한 argument는 다음과 같습니다.
+18가지 카테고리를 분류하는 Main Task 이외에 마스크 상태, 연령대(classification) 및 연령(regression), 성별의 4가지 sub task에 대한 학습을 모두 지원하며, K-Fold CV 학습 또한 가능합니다. 조정 가능한 argument는 다음과 같습니다.
 
 - `task` : main task(*main*), 마스크 상태(*mask*), 연령대(*ageg*), 연령(*age*), 성별(*gender*)의 5가지 task에 대한 학습이 가능합니다. (default: *main*)
 
@@ -84,29 +84,29 @@
 
 - `train/valid_root`: 학습용 데이터와 검증용 데이터의 경로를 입력합니다.
 
-- `transform_type`: Augmentation에 활용할 Transform 종류를 입력합니다. *Base*, *Random*, *TTA*, *Face Crop*을 지원합니다.
+- `transform_type`: Augmentation에 활용할 Transform 종류를 입력합니다. ***Base***(`'base'`), ***Random***(`'random'`), ***TTA***(`'tta'`), ***Face Crop***(`'facecrop'`)을 지원합니다.
 
-- `age_filter`: 일정 나이 이상인 인물의 연령대를 60대 이상 연령대로 강제 변경합니다. 50대 후반의 인물과 60대 인물의 사진은 분간하기가 어려워 예측 성능에 지장을 주는 경우가 있었기 때문에 고안한 argument입니다. 가령,  age_filter를 58로 설정할 경우, 58세 이상인 인물 모두가 '60대 이상 연령대' 범주로 강제 변경됩니다.
+- `age_filter`: 일정 나이 이상인 인물의 연령대를 60대 이상 연령대로 강제 변경합니다. 50대 후반의 인물과 60대 인물의 사진은 분간하기가 어려워 예측 성능에 지장을 주는 경우가 있었기 때문에 고안한 argument입니다. 가령,  `age_filter=58`로 설정 시 58세 이상인 인물 모두가 '60대 이상 연령대' 범주로 강제 변경됩니다.
 
 - `epochs`: 에폭을 설정합니다. (default: 30)
 
-- `cv`: KFold CV를 활용할 경우 사용하는 argument로, Fold 수를 설정합니다. 입력하지 않거나 1을 입력할 경우 단일 폴드로 학습, 즉 KFold CV가 진행되지 않습니다. (default: 1)
+- `cv`: K-Fold CV를 활용할 경우 사용하는 argument로, Fold 수를 설정합니다. 입력하지 않거나 1을 입력할 경우 단일 폴드로 학습, 즉 K-Fold CV가 진행되지 않습니다. (default: 1)
 
 - `batch_size`: 배치 사이즈를 설정합니다. (default: 32)
 
-- `optim_type`: 최적화 함수를 설정합니다. *Adam*, *AdamP*, *SGD*, *Momentum*을 지원합니다. (default: `adam`)
+- `optim_type`: 최적화 함수를 설정합니다. ***Adam***, ***AdamP***, ***SGD***, ***Momentum***을 지원합니다. (default: `adam`)
 
-- `loss_type`: 손실 함수를 설정합니다. *Label Smoothing Loss*, *Focal Loss*, *Cross Entropy Loss*, *MSE Loss*, *Smooth L1 Loss*를 지원합니다. (default: `labelsmootingloss`)
+- `loss_type`: 손실 함수를 설정합니다. ***Label Smoothing Loss***(`'labelsmoothingloss'`), ***Focal Loss***(`'focalloss'`), ***Cross Entropy Loss***(`'crossentropyloss'`), ***MSE Loss***(`'mseloss'`), ***Smooth L1 Loss***(`'smoothl1loss'`)를 지원합니다. (default: `labelsmootingloss`)
 
 - `lr`: Learning Rate를 설정합니다. (default: `0.005`)
 
-- `lr_scheduler`: LR 스케줄러를 설정합니다. *Cosine Annealing LR Decay*를 지원합니다. (default: `cosine`)
+- `lr_scheduler`: LR 스케줄러를 설정합니다. ***Cosine Annealing LR Decay***(`'cosine'`)를 지원합니다. (default: `cosine`)
 
   
 
 ### Inference Phase
 
-##### ***Singular Model Inference***
+#### ***Singular Model Inference***
 
 ```python
 >>> python submit_singular --task 'main' --model-type 'VanillaEfficientNet' --transform-type 'random'
@@ -126,7 +126,7 @@
 
   
 
-##### ***Ensemble Inference***
+#### ***Ensemble Inference***
 
 ```python
 >>> python submit_ensemble --task 'main' --root './saved_ensemble_models' --transform-type --method 'soft' --top-k 3 --tta 2
@@ -134,7 +134,7 @@
 
 - `task` : 메인 task(`'main'`), 마스크 상태(`'mask'`), 연령대(`'ageg'`), 연령(`'age'`), 성별(`'gender'`)의 5가지 task에 대한 추론이 가능합니다. (default: `'main'`)
 
-- `root` : 앙상블할 모델이 저장된 폴더 경로를 설정합니다. 현재 KFold 기반의 앙상블만이 지원되기 때문에, 입력한 경로는 다음과 같은 디렉토리 구조를 가져야 합니다. KFold의 최상위 폴더의 이름을 기준으로 모델 아키텍쳐를 불러오기 때문에, 최상위 폴더에는 모델명이 반드시 기재되어야 합니다. 
+- `root` : 앙상블할 모델이 저장된 폴더 경로를 설정합니다. 현재 KFold 기반의 앙상블만이 지원되기 때문에, 입력한 경로는 다음과 같은 디렉토리 구조를 가져야 합니다. K-Fold의 최상위 폴더의 이름을 기준으로 모델 아키텍쳐를 불러오기 때문에, 최상위 폴더에는 모델명이 반드시 기재되어야 합니다. 
 
   ```shell
   kfold-ensemble-VanillaEfficientNet
@@ -159,5 +159,37 @@
 
 
 
+## Data Preprocessing
 
+### Dataset
+
+##### *Split*
+
+![data split](C:\Users\iloveslowfood\Documents\workspace\ImageClassfication\etc\data split.png)
+
+주어진 학습 데이터 중 90%를 학습용 데이터로, 나머지 10%를 검증용 데이터로 활용했습니다. 합리적 검증을 위해 데이터를 이미지 단위가 아닌 사람 단위로 분리했는데, 이는 이미지 단위로 데이터를 분리할 경우 특정 사람의 이미지가 학습용 데이터와 검증용 데이터 모두에 등장해 검증 결과를 신뢰할 수 없는 문제가 발생할 수 있기 때문입니다. 또한, 주어진 학습 데이터의 분포가 public/private 데이터의 분포와 같다는 가정 하에, 학습용 데이터와 검증용 데이터의 분포가 같도록 층화추출법을 활용해 주어진 데이터를 분리하였고, 검증용 데이터에는 어떠한 가공도 취하지 않음으로써 검증 결과의 신뢰성을 확보했습니다.
+
+##### *Oversampling*
+
+![mixup](C:\Users\iloveslowfood\Documents\workspace\ImageClassfication\etc\mixup.png)
+
+주어진 데이터는 18가지 카테고리별 불균형이 존재합니다. 때문에 비교적 부족한 카테고리의 데이터를 오버샘플링한 데이터셋을 추가 구성, 주어진 데이터와 더불어 모델 실험에 활용했습니다.
+
+### Augmentation
+
+##### *Base*
+
+CentorCrop 등 가장 일반적인 이미지 가공 방법으로 구성된 Augmentation입니다. ([소스코드 보기](https://github.com/iloveslowfood/ImageClassfication/blob/a14c97f0d2253122a798913fbd29a7bdcb92f128/augmentation.py#L9))
+
+##### *Random*
+
+이미지를 임의로 가공하는 방법을 포함한 Augmentation으로, [RandAugment](https://github.com/ildoonet/pytorch-randaugment) 모듈을 활용합니다.([소스코드 보기](https://github.com/iloveslowfood/ImageClassfication/blob/a14c97f0d2253122a798913fbd29a7bdcb92f128/augmentation.py#L102))
+
+##### ***TTA***
+
+TTA(Test Time Augmentation)에 활용하기 위한 Augmentation으로, Train 단계에서는 ‘Random’ Augmentation과 같은 Augmentation이 진행되고, Inference 단계에서는 `RandomResizedCrop()`의 무작위적 Augmentation을 활용한다는 특징이 있습니다.([소스코드 보기](https://github.com/iloveslowfood/ImageClassfication/blob/a14c97f0d2253122a798913fbd29a7bdcb92f128/augmentation.py#L102))
+
+##### ***Face Crop***
+
+픽셀의 분포를 바탕으로 이미지 내 얼굴 부분을 crop하는 Augmentation입니다.([소스코드 보기](https://github.com/iloveslowfood/ImageClassfication/blob/a14c97f0d2253122a798913fbd29a7bdcb92f128/augmentation.py#L102))
 
