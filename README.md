@@ -114,7 +114,7 @@ transforms.Compose(
 
 - `task` : 메인 task(`'main'`), 마스크 상태(`'mask'`), 연령대(`'ageg'`), 연령(`'age'`), 성별(`'gender'`)의 5가지 task에 대한 추론이 가능합니다. (default: `'main'`)
 
-- `model_type` : 불러올 모델 아키텍쳐를 선택합니다. 지원하는 모델 아키텍쳐는 ***VanillaEfficientNet***(`'VanillaEfficientNet'`), ***VanillaResNet***(`'VanillaResNet'`), MultiLabelTHANe (`'MultiLabelTHANet'`), ***MultiClassTHANet_MK1***(`'MultiClassTHANet_MK1'`), THANet_MK1(`'THANet_MK1'`), THANet_MK2(`'THANet_MK2'`)이 있습니다. (default: `'VanillaEfficientNet'`)
+- `model_type` : 불러올 모델 아키텍쳐를 선택합니다. 지원하는 모델 아키텍쳐는 ***VanillaEfficientNet***(`'VanillaEfficientNet'`), ***VanillaResNet***(`'VanillaResNet'`), ***MultiLabelTHANet*** (`'MultiLabelTHANet'`), ***MultiClassTHANet_MK1***(`'MultiClassTHANet_MK1'`), ***THANet_MK1***(`'THANet_MK1'`), ***THANet_MK2***(`'THANet_MK2'`)이 있습니다. (default: `'VanillaEfficientNet'`)
 
 - `load_state_dict` : 추론에 활용할 사전 학습된 파라미터 파일의 경로를 설정합니다. 모델 아키텍쳐에 맞는 파라미터 파일을 불러와야 정상 작동합니다.
 
@@ -159,17 +159,17 @@ transforms.Compose(
 
 
 
-## Data Preprocessing
+## Data
 
 ### Dataset
 
-##### *Split*
+#### *Split*
 
 ![data split](C:\Users\iloveslowfood\Documents\workspace\ImageClassfication\etc\data split.png)
 
 주어진 학습 데이터 중 90%를 학습용 데이터로, 나머지 10%를 검증용 데이터로 활용했습니다. 합리적 검증을 위해 데이터를 이미지 단위가 아닌 사람 단위로 분리했는데, 이는 이미지 단위로 데이터를 분리할 경우 특정 사람의 이미지가 학습용 데이터와 검증용 데이터 모두에 등장해 검증 결과를 신뢰할 수 없는 문제가 발생할 수 있기 때문입니다. 또한, 주어진 학습 데이터의 분포가 public/private 데이터의 분포와 같다는 가정 하에, 학습용 데이터와 검증용 데이터의 분포가 같도록 층화추출법을 활용해 주어진 데이터를 분리하였고, 검증용 데이터에는 어떠한 가공도 취하지 않음으로써 검증 결과의 신뢰성을 확보했습니다.
 
-##### *Oversampling*
+#### *Oversampling*
 
 ![mixup](C:\Users\iloveslowfood\Documents\workspace\ImageClassfication\etc\mixup.png)
 
@@ -177,19 +177,47 @@ transforms.Compose(
 
 ### Augmentation
 
-##### *Base*
+#### *Base*
 
 CentorCrop 등 가장 일반적인 이미지 가공 방법으로 구성된 Augmentation입니다. ([소스코드 보기](https://github.com/iloveslowfood/ImageClassfication/blob/a14c97f0d2253122a798913fbd29a7bdcb92f128/augmentation.py#L9))
 
-##### *Random*
+#### *Random*
 
 이미지를 임의로 가공하는 방법을 포함한 Augmentation으로, [RandAugment](https://github.com/ildoonet/pytorch-randaugment) 모듈을 활용합니다.([소스코드 보기](https://github.com/iloveslowfood/ImageClassfication/blob/a14c97f0d2253122a798913fbd29a7bdcb92f128/augmentation.py#L102))
 
-##### ***TTA***
+#### ***TTA***
 
 TTA(Test Time Augmentation)에 활용하기 위한 Augmentation으로, Train 단계에서는 ‘Random’ Augmentation과 같은 Augmentation이 진행되고, Inference 단계에서는 `RandomResizedCrop()`의 무작위적 Augmentation을 활용한다는 특징이 있습니다.([소스코드 보기](https://github.com/iloveslowfood/ImageClassfication/blob/a14c97f0d2253122a798913fbd29a7bdcb92f128/augmentation.py#L102))
 
-##### ***Face Crop***
+#### ***Face Crop***
 
 픽셀의 분포를 바탕으로 이미지 내 얼굴 부분을 crop하는 Augmentation입니다.([소스코드 보기](https://github.com/iloveslowfood/ImageClassfication/blob/a14c97f0d2253122a798913fbd29a7bdcb92f128/augmentation.py#L102))
+
+
+
+## Models
+
+#### *VanillaEfficientNet*
+
+![veffi](C:\Users\iloveslowfood\Documents\workspace\ImageClassfication\etc\veffi.png)
+
+Pretrained EfficientNet(`'efficientnet-b3'`)을 Backbone으로 하는 간단한 이미지 분류 모델입니다. ([소스코드 보기](https://github.com/iloveslowfood/ImageClassfication/blob/05f60efadc8865b5f76e9503881b5337e5d64313/model.py#L43))
+
+#### *VanillaResNet*
+
+![vres](C:\Users\iloveslowfood\Documents\workspace\ImageClassfication\etc\vres.png)
+
+Pretrained ResNet(`resnet50`)을 Backbone으로 하는 간단한 이미지 분류 모델입니다. ([소스코드 보기](https://github.com/iloveslowfood/ImageClassfication/blob/05f60efadc8865b5f76e9503881b5337e5d64313/model.py#L70))
+
+#### ***MultiClassTHANet_MK1***
+
+![thanet](C:\Users\iloveslowfood\Documents\workspace\ImageClassfication\etc\thanet.png)
+
+Pretrained Image Network와 Attention 아키텍쳐를 활용한 이미지 분류 모델입니다. ([소스코드 보기](https://github.com/iloveslowfood/ImageClassfication/blob/05f60efadc8865b5f76e9503881b5337e5d64313/model.py#L96))
+
+#### *MultiLabelTHANet_MK1*
+
+![thanet_ml](C:\Users\iloveslowfood\Documents\workspace\ImageClassfication\etc\thanet_ml.png)
+
+Pretrained Image Network와 Attention 아키텍쳐를 활용한 이미지 분류 모델입니다. ([소스코드 보기](https://github.com/iloveslowfood/ImageClassfication/blob/05f60efadc8865b5f76e9503881b5337e5d64313/model.py#L171))
 
