@@ -22,7 +22,7 @@
 
 ### Best Model Configuration
 
-#### I. Structure
+#### I. Structure: *Ensemble VanillaEfficientNet with K-Fold CV*
 
 K-Fold CV를 통해 학습된 VanillaEfficientNet 모델을 각 Fold별로 N개씩 저장, 추론 단계에서 각 Fold별 K개의 모델을 불러와 TTA(Test Time Augmentation)를 적용하여 모든 결과값을 앙상블했습니다. Fold 수를 5로, Fold별 불러올 모델 수를 2로, TTA를 2로 설정하여 총 20(5x2x2)개의 추론 결과를 산술평균한 Soft Voting 앙상블의 성능이 가장 높았습니다. (Private LB. F1 0.7604, Accuracy 81.0952%)
 
