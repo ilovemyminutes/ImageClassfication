@@ -163,13 +163,13 @@ transforms.Compose(
 
 #### *Split*
 
-![data split](C:\Users\iloveslowfood\Documents\workspace\ImageClassfication\etc\data split.png)
+![data split](https://github.com/iloveslowfood/ImageClassfication/blob/main/etc/data%20split.png?raw=true)
 
 주어진 학습 데이터 중 90%를 학습용 데이터로, 나머지 10%를 검증용 데이터로 활용했습니다. 합리적 검증을 위해 데이터를 이미지 단위가 아닌 사람 단위로 분리했는데, 이는 이미지 단위로 데이터를 분리할 경우 특정 사람의 이미지가 학습용 데이터와 검증용 데이터 모두에 등장해 검증 결과를 신뢰할 수 없는 문제가 발생할 수 있기 때문입니다. 또한, 주어진 학습 데이터의 분포가 public/private 데이터의 분포와 같다는 가정 하에, 학습용 데이터와 검증용 데이터의 분포가 같도록 층화추출법을 활용해 주어진 데이터를 분리하였고, 검증용 데이터에는 어떠한 가공도 취하지 않음으로써 검증 결과의 신뢰성을 확보했습니다.
 
 #### *Oversampling*
 
-![mixup](C:\Users\iloveslowfood\Documents\workspace\ImageClassfication\etc\mixup.png)
+![mixup](https://github.com/iloveslowfood/ImageClassfication/blob/main/etc/mixup.png?raw=true)
 
 주어진 데이터는 18가지 카테고리별 불균형이 존재합니다. 때문에 비교적 부족한 카테고리의 데이터를 오버샘플링한 데이터셋을 추가 구성, 주어진 데이터와 더불어 모델 실험에 활용했습니다.
 
@@ -221,6 +221,6 @@ Pretrained Image Network와 Attention 아키텍쳐를 활용한 이미지 분류
 
 #### ***THANet_MK1***
 
-![thanet_3](C:\Users\iloveslowfood\Documents\workspace\ImageClassfication\etc\thanet_3.png)
+![thanet_3](https://github.com/iloveslowfood/ImageClassfication/blob/main/etc/thanet_3.png?raw=true)
 
 Pretrained Image Network를 활용한 Multi-label 이미지 분류 모델입니다. ([소스코드 보기](https://github.com/iloveslowfood/ImageClassfication/blob/7ef05acccfa04a386a6b98a4e471e8572ea75ff2/model.py#L240))
