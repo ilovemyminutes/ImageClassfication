@@ -22,13 +22,17 @@
 
 ### Best Model Configuration
 
-##### ***Structure***: K-Fold Ensemble using VanillaEfficientNet Architecture
+#### I. Structure
+
+K-Fold CV를 통해 학습된 VanillaEfficientNet 모델을 각 Fold별로 N개씩 저장, 추론 단계에서 각 Fold별 K개의 모델을 불러와 TTA(Test Time Augmentation)를 적용하여 모든 결과값을 앙상블했습니다. Fold 수를 5로, Fold별 불러올 모델 수를 2로, TTA를 2로 설정하여 총 20(5x2x2)개의 추론 결과를 산술평균한 Soft Voting 앙상블의 성능이 가장 높았습니다. (Private LB. F1 0.7604, Accuracy 81.0952%)
 
 ![ensemble_1](https://github.com/iloveslowfood/ImageClassfication/blob/main/etc/ensemble_1.png?raw=true)
 
 ![ensemble_2](https://github.com/iloveslowfood/ImageClassfication/blob/main/etc/ensemble_2.png?raw=true)
 
-### Hyper Parameters
+#### II. Hyper Parameters
+
+앙상블에 활용한 VanillaEfficientNet 모델의 하이퍼 파라미터는 다음과 같습니다.
 
 ```python
 batch_size=32
