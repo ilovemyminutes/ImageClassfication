@@ -78,9 +78,7 @@ transforms.Compose(
 
 - `task` : main task(*main*), 마스크 상태(*mask*), 연령대(*ageg*), 연령(*age*), 성별(*gender*)의 5가지 task에 대한 학습이 가능합니다. (default: *main*)
 
-- `model_type`: 학습할 모델을 선택합니다. 지원하는 모델 아키텍쳐는 `VanillaEfficientNet`, `VanillaResNet`, `MultiLabelTHANet`, `MultiClassTHANet_MK1`, `THANet_MK1`, `THANet_MK2`이 있습니다. 
-
-- `load_state_dict`: 저장된 모델을 불러와 학습할 경우 저장된 파일의 경로를 입력합니다. 저장된 파라미터와 `model_type`이 일치해야 합니다.
+- `model_type` : 불러올 모델 아키텍쳐를 선택합니다. 지원하는 모델 아키텍쳐는 ***VanillaEfficientNet***(`'VanillaEfficientNet'`), ***VanillaResNet***(`'VanillaResNet'`), ***MultiLabelTHANet*** (`'MultiLabelTHANet'`), ***MultiClassTHANet_MK1***(`'MultiClassTHANet_MK1'`), ***THANet_MK1***(`'THANet_MK1'`)이 있습니다. (default: `'VanillaEfficientNet'`)`load_state_dict`: 저장된 모델을 불러와 학습할 경우 저장된 파일의 경로를 입력합니다. 저장된 파라미터와 `model_type`이 일치해야 합니다.
 
 - `train/valid_root`: 학습용 데이터와 검증용 데이터의 경로를 입력합니다.
 
@@ -114,7 +112,7 @@ transforms.Compose(
 
 - `task` : 메인 task(`'main'`), 마스크 상태(`'mask'`), 연령대(`'ageg'`), 연령(`'age'`), 성별(`'gender'`)의 5가지 task에 대한 추론이 가능합니다. (default: `'main'`)
 
-- `model_type` : 불러올 모델 아키텍쳐를 선택합니다. 지원하는 모델 아키텍쳐는 ***VanillaEfficientNet***(`'VanillaEfficientNet'`), ***VanillaResNet***(`'VanillaResNet'`), ***MultiLabelTHANet*** (`'MultiLabelTHANet'`), ***MultiClassTHANet_MK1***(`'MultiClassTHANet_MK1'`), ***THANet_MK1***(`'THANet_MK1'`), ***THANet_MK2***(`'THANet_MK2'`)이 있습니다. (default: `'VanillaEfficientNet'`)
+- `model_type` : 불러올 모델 아키텍쳐를 선택합니다. 지원하는 모델 아키텍쳐는 ***VanillaEfficientNet***(`'VanillaEfficientNet'`), ***VanillaResNet***(`'VanillaResNet'`), ***MultiLabelTHANet*** (`'MultiLabelTHANet'`), ***MultiClassTHANet_MK1***(`'MultiClassTHANet_MK1'`), ***THANet_MK1***(`'THANet_MK1'`)이 있습니다. (default: `'VanillaEfficientNet'`)
 
 - `load_state_dict` : 추론에 활용할 사전 학습된 파라미터 파일의 경로를 설정합니다. 모델 아키텍쳐에 맞는 파라미터 파일을 불러와야 정상 작동합니다.
 
@@ -199,25 +197,30 @@ TTA(Test Time Augmentation)에 활용하기 위한 Augmentation으로, Train 단
 
 #### *VanillaEfficientNet*
 
-![veffi](C:\Users\iloveslowfood\Documents\workspace\ImageClassfication\etc\veffi.png)
+![veffi](https://github.com/iloveslowfood/ImageClassfication/blob/main/etc/veffi.png?raw=true)
 
 Pretrained EfficientNet(`'efficientnet-b3'`)을 Backbone으로 하는 간단한 이미지 분류 모델입니다. ([소스코드 보기](https://github.com/iloveslowfood/ImageClassfication/blob/05f60efadc8865b5f76e9503881b5337e5d64313/model.py#L43))
 
 #### *VanillaResNet*
 
-![vres](C:\Users\iloveslowfood\Documents\workspace\ImageClassfication\etc\vres.png)
+![vres](https://github.com/iloveslowfood/ImageClassfication/blob/main/etc/vres.png?raw=true)
 
 Pretrained ResNet(`resnet50`)을 Backbone으로 하는 간단한 이미지 분류 모델입니다. ([소스코드 보기](https://github.com/iloveslowfood/ImageClassfication/blob/05f60efadc8865b5f76e9503881b5337e5d64313/model.py#L70))
 
 #### ***MultiClassTHANet_MK1***
 
-![thanet](C:\Users\iloveslowfood\Documents\workspace\ImageClassfication\etc\thanet.png)
+![thanet](https://github.com/iloveslowfood/ImageClassfication/blob/main/etc/thanet.png?raw=true)
 
-Pretrained Image Network와 Attention 아키텍쳐를 활용한 이미지 분류 모델입니다. ([소스코드 보기](https://github.com/iloveslowfood/ImageClassfication/blob/05f60efadc8865b5f76e9503881b5337e5d64313/model.py#L96))
+Pretrained Image Network와 Attention 아키텍쳐를 활용한 이미지 분류 모델입니다. ([소스코드 보기](https://github.com/iloveslowfood/ImageClassfication/blob/7ef05acccfa04a386a6b98a4e471e8572ea75ff2/model.py#L96))
 
 #### *MultiLabelTHANet_MK1*
 
-![thanet_ml](C:\Users\iloveslowfood\Documents\workspace\ImageClassfication\etc\thanet_ml.png)
+![thanet_ml](https://github.com/iloveslowfood/ImageClassfication/blob/main/etc/thanet_ml.png?raw=true)
 
-Pretrained Image Network와 Attention 아키텍쳐를 활용한 이미지 분류 모델입니다. ([소스코드 보기](https://github.com/iloveslowfood/ImageClassfication/blob/05f60efadc8865b5f76e9503881b5337e5d64313/model.py#L171))
+Pretrained Image Network와 Attention 아키텍쳐를 활용한 이미지 분류 모델입니다. ([소스코드 보기](https://github.com/iloveslowfood/ImageClassfication/blob/7ef05acccfa04a386a6b98a4e471e8572ea75ff2/model.py#L171))
 
+#### ***THANet_MK1***
+
+![thanet_3](C:\Users\iloveslowfood\Documents\workspace\ImageClassfication\etc\thanet_3.png)
+
+Pretrained Image Network를 활용한 Multi-label 이미지 분류 모델입니다. ([소스코드 보기](https://github.com/iloveslowfood/ImageClassfication/blob/7ef05acccfa04a386a6b98a4e471e8572ea75ff2/model.py#L240))
