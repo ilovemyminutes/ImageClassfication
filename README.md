@@ -14,7 +14,7 @@
 
 - ***Data.*** 한 명당 7장(마스크 착용x1, 미착용x1, 불완전 착용x5) ,총 *2*,700명의 이미지. 한 사람당 384x512
 
-  ![maskimg](C:\Users\iloveslowfood\Documents\workspace\ImageClassfication\etc\maskimg.png)
+  ![maskimg](https://github.com/iloveslowfood/ImageClassfication/blob/main/etc/maskimg.png?raw=true)
 
 
 
