@@ -7,9 +7,14 @@
 ## Task Description
 
 - ***Period.*** 2021.03.29~2021.04.08
+
 - ***Problem Type.*** Classification - 마스크/성별/연령대에 따른 18개 클래스
+
 - ***Metric.*** Macro F1 Score
+
 - ***Data.*** 한 명당 7장(마스크 착용x1, 미착용x1, 불완전 착용x5) ,총 *2*,700명의 이미지. 한 사람당 384x512
+
+  ![maskimg](C:\Users\iloveslowfood\Documents\workspace\ImageClassfication\etc\maskimg.png)
 
 
 
@@ -18,7 +23,10 @@
 ### Scores
 
 - Public LB.  F1 0.7706, Accuracy 81.3333%
+
 - Private LB. F1 0.7604, Accuracy 81.0952%
+
+  
 
 ### Best Model Configuration
 
